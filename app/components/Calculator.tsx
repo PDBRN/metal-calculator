@@ -9,7 +9,7 @@ import { calculateResult } from "./calc";
 import AssortmentScheme from "./schemes";
 
 export default function Calculator() {
-  const [metal, setMetal] = useState("Черный");
+  const [metal, setMetal] = useState("Чёрный");
   const [assortment, setAssortment] = useState("");
   const [mode, setMode] = useState<"weight" | "length">("weight");
 
@@ -59,7 +59,7 @@ export default function Calculator() {
           <div className="flex-1 p-6 md:p-8 space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <h1 className="text-xl font-extrabold tracking-tight text-zinc-900">
-                Калькулятор<span className="text-blue-600">.</span>
+                Калькулятор<span className="text-blue-600"> металла</span>
               </h1>
               <div className="flex bg-zinc-100 p-1 rounded-xl w-full sm:w-auto">
                 <button
@@ -109,7 +109,14 @@ export default function Calculator() {
                     </div>
 
                     {assortment === "Арматура" && (
-                      <UiSelect label="Диаметр (мм)" value={d} onChange={setD} options={["6", "8", "10", "12", "14", "16", "20", "25", "32"]} className="w-full sm:w-1/2" />
+                      <div className="grid grid-cols-2 gap-4">
+                        <UiSelect
+                          label="Диаметр (мм)"
+                          value={d}
+                          onChange={setD}
+                          options={["6","8","10","12","14","16","20","25","32","36"]}
+                        />
+                      </div>
                     )}
 
                     {assortment === "Балка/двутавр" && (
@@ -183,7 +190,7 @@ export default function Calculator() {
             <div className="absolute top-0 right-0 -mt-10 -mr-10 h-40 w-40 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
 
             <div className="relative z-10 flex-1 flex items-center justify-center py-6">
-              <div className="w-48 h-48 rounded-2xl border-2 border-dashed border-zinc-300 flex items-center justify-center text-zinc-400 bg-white shadow-sm overflow-hidden">
+              <div className="w-[260px] h-[260px] flex items-center justify-center">
                  <AssortmentScheme assortment={assortment} d={d} a={a} b={b} t={t} />
               </div>
             </div>

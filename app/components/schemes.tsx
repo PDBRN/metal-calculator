@@ -1,7 +1,7 @@
 import React from "react";
 
 // Общие настройки стилей схемы
-const size = 200;
+const size = 260;
 const center = size / 2;
 const strokeColor = "#18181b"; // черный
 const dimColor = "#2563EB";    // синий
@@ -35,9 +35,59 @@ const Dim = ({ x1, y1, x2, y2, label, offset = 25, vertical = false }: any) => {
   );
 }
 
+const DimDiameter = ({
+  x1,
+  x2,
+  yTouch,
+  yDim,
+  label,
+}: {
+  x1: number;        // левая точка касания тела (без ушек)
+  x2: number;        // правая точка касания тела (без ушек)
+  yTouch: number;    // y касания тела (обычно center)
+  yDim: number;      // y размерной линии
+  label: string;     // например "D 10"
+}) => {
+  // защита от NaN
+  if (![x1, x2, yTouch, yDim].every(Number.isFinite)) return null;
+
+  return (
+    <g>
+      {/* выносные линии (палочки) */}
+      <line x1={x1} y1={yTouch} x2={x1} y2={yDim} stroke={dimColor} strokeWidth="1.5" />
+      <line x1={x2} y1={yTouch} x2={x2} y2={yDim} stroke={dimColor} strokeWidth="1.5" />
+
+      {/* размерная линия */}
+      <line
+        x1={x1}
+        y1={yDim}
+        x2={x2}
+        y2={yDim}
+        stroke={dimColor}
+        strokeWidth="2"
+        markerStart="url(#arrow-rev)"
+        markerEnd="url(#arrow)"
+      />
+
+      {/* подпись (без белой плашки) */}
+      <text
+        x={(x1 + x2) / 2}
+        y={yDim + 16}
+        textAnchor="middle"
+        fill={dimColor}
+        fontSize="14"
+        fontWeight="800"
+      >
+        {label}
+      </text>
+    </g>
+  );
+};
+
+
 const Wrapper = ({ children }: { children: React.ReactNode }) => (
   <div className="flex flex-col items-center justify-center">
-    <svg viewBox={`0 0 ${size} ${size}`} className="w-48 h-48">
+    <svg viewBox={`0 0 ${size} ${size}`} className="w-full h-full">
       <Defs />
       {children}
     </svg>
@@ -56,19 +106,112 @@ export default function AssortmentScheme({ assortment, d, a, b, t }: SchemeProps
   if (!assortment) return <span className="text-4xl text-zinc-200">?</span>;
 
   if (assortment === "Арматура") {
-    const r = 60;
-    return (
-      <Wrapper>
-        <circle cx={center} cy={center} r={r} fill="url(#hatch)" stroke={strokeColor} strokeWidth="2" />
-        {/* Ушки */}
-        <path d={`M${center-r},${center-6} L${center-r-4},${center-6} L${center-r-4},${center+6} L${center-r},${center+6}`} fill="white" stroke={strokeColor} strokeWidth="2" />
-        <path d={`M${center+r},${center-6} L${center+r+4},${center-6} L${center+r+4},${center+6} L${center+r},${center+6}`} fill="white" stroke={strokeColor} strokeWidth="2" />
-        <line x1={center} y1={center-r-15} x2={center} y2={center+r+15} strokeWidth="1" className="dash" />
-        <line x1={center-r-15} y1={center} x2={center+r+15} y2={center} strokeWidth="1" className="dash" />
-        <Dim x1={center-r} y1={center+r} x2={center+r} y2={center+r} label={`D ${d || "?"}`} offset={25} />
-      </Wrapper>
-    );
-  }
+  // 1. Уменьшаем размеры, чтобы было аккуратнее
+  const rBody = 58;       // Основной радиус (тело)
+  const ribHeight = 10;   // Высота "серпа" (рифления)
+  
+  // Ушки делаем маленькими прямоугольниками, как на чертеже
+  const earW = 8;         
+  const earH = 12;
+
+  const xL = center - rBody;
+  const xR = center + rBody;
+
+  // Координаты для размерных линий
+  const yTouch = center;
+  const yDim = center + rBody + ribHeight + 25; // Отступ вниз для размера
+
+  // ГЛАВНЫЙ СЕКРЕТ ВИЗУАЛА:
+  // Рисуем эллиптическую дугу. 
+  // rx = rBody (ширина равна телу)
+  // ry = rBody + ribHeight (высота больше тела)
+  // Это создает эффект плавного схождения "на нет" по бокам.
+  const rOuterY = rBody + ribHeight; 
+  
+  // Формула SVG пути: M (начало) A (радиусХ радиусY ...) (конец)
+  const arcTop = `M ${xL},${center} A ${rBody},${rOuterY} 0 0 1 ${xR},${center}`;
+  const arcBot = `M ${xL},${center} A ${rBody},${rOuterY} 0 0 0 ${xR},${center}`;
+
+  // Цвет линий делаем чуть строже, если strokeColor приходит цветным, 
+  // для чертежа лучше использовать почти черный или темно-серый.
+  const drawingColor = strokeColor || "#333";
+  const lineWidth = "2"; // Тонкие линии как на чертеже (было 3)
+
+  return (
+    <Wrapper>
+      {/* 1. Тело арматуры (заштрихованный круг) */}
+      <circle 
+        cx={center} 
+        cy={center} 
+        r={rBody} 
+        fill="url(#hatch)" 
+        stroke={drawingColor} 
+        strokeWidth={lineWidth} 
+      />
+
+      {/* 2. Верхняя и нижняя дуги (рифление) */}
+      {/* fill="none" оставляет фон прозрачным/белым */}
+      <path d={arcTop} fill="none" stroke={drawingColor} strokeWidth={lineWidth} strokeLinecap="round" />
+      <path d={arcBot} fill="none" stroke={drawingColor} strokeWidth={lineWidth} strokeLinecap="round" />
+
+      {/* 3. Ушки (прямоугольники) */}
+      {/* fill="white" перекрывает штриховку, если она попадет под них,
+          но важнее, что они пристыкованы ровно к краям xL и xR */}
+      <rect
+        x={xL - earW}
+        y={center - earH / 2}
+        width={earW}
+        height={earH}
+        fill="white"
+        stroke={drawingColor}
+        strokeWidth={lineWidth}
+      />
+      <rect
+        x={xR}
+        y={center - earH / 2}
+        width={earW}
+        height={earH}
+        fill="white"
+        stroke={drawingColor}
+        strokeWidth={lineWidth}
+      />
+
+      {/* 4. Осевые пунктирные линии */}
+      {/* Они должны проходить ПОВЕРХ ушек (как на скриншоте конкурентов) */}
+      <line 
+        x1={center} 
+        y1={center - rOuterY - 15} 
+        x2={center} 
+        y2={center + rOuterY + 15} 
+        stroke={drawingColor}
+        strokeWidth="1" 
+        strokeDasharray="4,4" // Более частый пунктир для аккуратности
+        className="dash" 
+      />
+      <line 
+        x1={center - rBody - earW - 10} // Линия выходит за ушки
+        y1={center} 
+        x2={center + rBody + earW + 10} 
+        y2={center} 
+        stroke={drawingColor}
+        strokeWidth="1" 
+        strokeDasharray="4,4"
+        className="dash" 
+      />
+
+      {/* 5. Размер D */}
+      {/* Важно: размер меряется по ТЕЛУ (xL, xR), линии идут от стыка ушка и круга */}
+      <DimDiameter 
+        x1={xL} 
+        x2={xR} 
+        yTouch={yTouch} 
+        yDim={yDim} 
+        label={`D ${d || ""}`} 
+      />
+    </Wrapper>
+  );
+}
+
 
   if (assortment === "Балка/двутавр") {
     const w = 90; const h = 120; const th = 15;
