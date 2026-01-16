@@ -1,4 +1,4 @@
-import { DENSITIES, BEAM_KG_PER_M } from "./data";
+import { DENSITIES, BEAM_KG_PER_M, STEEL_GRADE_DENSITY } from "./data";
 
 export type CalcMode = "weight" | "length";
 
@@ -16,6 +16,8 @@ export type CalcInputs = {
   a: number;        // сторона/ширина/высота (м)
   b: number;        // ширина/высота/длина листа (м)
   t: number;        // толщина/стенка (м)
+
+  steelMark?: string;
 
   // Балка / двутавр (табличный расчет)
   beamType?: string;
@@ -100,7 +102,13 @@ export function calculateResult(
   assortment: string,
   inputs: CalcInputs
 ): number {
-  const density = DENSITIES[metal] || 7850;
+  const baseDensity = DENSITIES[metal] || 7850;
+
+// Плотность по марке стали — только для "Чёрный"
+  const density =
+    metal === "Чёрный" && inputs.steelMark
+      ? (STEEL_GRADE_DENSITY[inputs.steelMark] || baseDensity)
+      : baseDensity;
 
   // Нормализуем входы (без NaN)
   const qty = isFinitePos(inputs.qty) ? inputs.qty : 1;

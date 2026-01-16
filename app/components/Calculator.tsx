@@ -95,6 +95,7 @@ export default function Calculator() {
       t: toNum(t) / 1000,
 
       // Балка
+      steelMark,
       beamType,
       beamNumber,
     };
@@ -225,6 +226,20 @@ export default function Calculator() {
           </div>
         )}
 
+        {assortment === "Круг/пруток" && (
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <UiSelect
+      label="Марка стали"
+      value={steelMark}
+      onChange={setSteelMark}
+      options={STEEL_GRADES as unknown as string[]}
+      className="sm:col-span-1"
+    />
+    <div className="hidden sm:block" />
+  </div>
+)}
+
+
         {/* ---- ЛИСТ/ПЛИТА и ЛЕНТА ---- */}
         {(assortment === "Лист/плита" || assortment === "Лента") && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -252,7 +267,7 @@ export default function Calculator() {
             {assortment === "Труба круглая" ? (
               <InputField label="Стенка t" value={t} onChange={setT} suffix="мм" />
             ) : (
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              <div className="hidden sm:block" />
             )}
           </div>
         )}
