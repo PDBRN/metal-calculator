@@ -1,66 +1,192 @@
-import { DENSITIES } from "./data";
+import { DENSITIES, BEAM_KG_PER_M } from "./data";
 
+export type CalcMode = "weight" | "length";
+
+/**
+ * Входные данные:
+ * - Все размеры в МЕТРАХ (d/a/b/t уже делятся на 1000 в Calculator.tsx)
+ * - len в метрах
+ * - weight в кг
+ */
 export type CalcInputs = {
-  qty: number;
-  len: number;
-  weight: number;
-  d: number; // диаметр (м)
-  a: number; // сторона/высота (м)
-  b: number; // ширина/длина листа (м)
-  t: number; // толщина (м)
+  qty: number;      // количество (шт)
+  len: number;      // длина L (м)
+  weight: number;   // общий вес (кг) — когда mode === "length"
+  d: number;        // диаметр (м)
+  a: number;        // сторона/ширина/высота (м)
+  b: number;        // ширина/высота/длина листа (м)
+  t: number;        // толщина/стенка (м)
+
+  // Балка / двутавр (табличный расчет)
+  beamType?: string;
+  beamNumber?: string;
 };
 
+function isFinitePos(n: number) {
+  return Number.isFinite(n) && n > 0;
+}
+
+function clampNonNegative(n: number) {
+  return Number.isFinite(n) ? Math.max(0, n) : 0;
+}
+
+/**
+ * Площадь круга по диаметру (м)
+ */
+function areaCircleByDiameter(d: number) {
+  if (!isFinitePos(d)) return 0;
+  const r = d / 2;
+  return Math.PI * r * r;
+}
+
+/**
+ * Площадь кольца (труба круглая): наружный диаметр d, толщина стенки t
+ */
+function areaRoundTube(d: number, t: number) {
+  if (!isFinitePos(d) || !isFinitePos(t)) return 0;
+  const rOut = d / 2;
+  const rIn = rOut - t;
+  if (rIn <= 0) return 0;
+  return Math.PI * (rOut * rOut - rIn * rIn);
+}
+
+/**
+ * Площадь прямоугольной трубы: A x B с толщиной t
+ * Вход: a и b в метрах. Иногда b может быть пустым — тогда берём b=a.
+ */
+function areaRectTube(a: number, b: number, t: number) {
+  if (!isFinitePos(a) || !isFinitePos(t)) return 0;
+  const H = isFinitePos(b) ? b : a;
+
+  const areaOut = a * H;
+  const aIn = a - 2 * t;
+  const hIn = H - 2 * t;
+  if (aIn <= 0 || hIn <= 0) return 0;
+
+  const areaIn = aIn * hIn;
+  return areaOut - areaIn;
+}
+
+/**
+ * Площадь ленты: ширина a * толщина t
+ */
+function areaStrip(a: number, t: number) {
+  if (!isFinitePos(a) || !isFinitePos(t)) return 0;
+  return a * t;
+}
+
+/**
+ * Масса листа/плиты: толщина t * ширина a * длина b * плотность * qty
+ * ВНИМАНИЕ: здесь len не участвует.
+ */
+function weightPlate(t: number, a: number, b: number, density: number, qty: number) {
+  if (!isFinitePos(t) || !isFinitePos(a) || !isFinitePos(b) || !isFinitePos(density) || !isFinitePos(qty)) return 0;
+  const vol = t * a * b; // м3
+  return vol * density * qty; // кг
+}
+
+/**
+ * Балка/двутавр: поиск кг/м по типу и номеру
+ */
+function beamKgPerM(beamType?: string, beamNumber?: string) {
+  if (!beamType || !beamNumber) return 0;
+  const v = BEAM_KG_PER_M?.[beamType]?.[beamNumber];
+  return Number.isFinite(v) ? (v as number) : 0;
+}
+
 export function calculateResult(
-  mode: "weight" | "length",
+  mode: CalcMode,
   metal: string,
   assortment: string,
   inputs: CalcInputs
 ): number {
-  
-  // 1. Берем плотность (или по умолчанию сталь)
-  const density = DENSITIES[metal] || 7850; 
-  
-  const { qty, len, weight, d, a, b, t } = inputs;
+  const density = DENSITIES[metal] || 7850;
 
+  // Нормализуем входы (без NaN)
+  const qty = isFinitePos(inputs.qty) ? inputs.qty : 1;
+
+  const len = clampNonNegative(inputs.len);
+  const weight = clampNonNegative(inputs.weight);
+
+  const d = clampNonNegative(inputs.d);
+  const a = clampNonNegative(inputs.a);
+  const b = clampNonNegative(inputs.b);
+  const t = clampNonNegative(inputs.t);
+
+  // ----------------------------
+  // 1) Балка/двутавр — ТАБЛИЧНЫЙ РАСЧЕТ
+  // ----------------------------
+  if (assortment === "Балка/двутавр") {
+  const kgPerM = beamKgPerM(inputs.beamType, inputs.beamNumber);
+  if (!kgPerM) return 0;
+
+  if (mode === "weight") return kgPerM * len * qty;
+  return weight / (kgPerM * qty);
+
+}
+
+  // ----------------------------
+  // 2) Лист/плита — ОБЪЕМНЫЙ РАСЧЕТ
+  // ----------------------------
+  if (assortment === "Лист/плита") {
+    if (mode === "weight") {
+      return weightPlate(t, a, b, density, qty);
+    }
+    // Если в будущем захотите считать "длину" по весу для листа — нужно определить,
+    // что именно мы считаем длиной: b при фиксированных t и a.
+    // Тогда b = weight / (density * t * a * qty)
+    // Сейчас делаю логично:
+    if (!isFinitePos(weight) || !isFinitePos(t) || !isFinitePos(a) || !isFinitePos(density)) return 0;
+    return weight / (density * t * a * qty);
+  }
+
+  // ----------------------------
+  // 3) Остальные сортаменты — через площадь сечения
+  // ----------------------------
   let area_m2 = 0;
 
-  // 2. Считаем площадь сечения (геометрия)
+  // Круглое сплошное
   if (assortment === "Арматура" || assortment === "Круг/пруток" || assortment === "Проволока") {
-     area_m2 = Math.PI * Math.pow(d / 2, 2);
-  } 
-  else if (assortment === "Квадрат") {
-     area_m2 = a * a;
-  }
-  else if (assortment === "Лист/плита") {
-     // Для листа логика: Вес = (Толщина * Ширина * Длина) * Плотность
-     const vol = t * a * b;
-     if (mode === "weight") return vol * density * qty;
-     else return 0;
-  }
-  else if (assortment === "Лента") {
-     area_m2 = a * t;
-  }
-  else if (assortment === "Труба круглая") {
-     const r_out = d / 2;
-     const r_in = r_out - t;
-     area_m2 = Math.PI * (Math.pow(r_out, 2) - Math.pow(r_in, 2));
-  }
-  else if (assortment === "Труба профильная") {
-     const h = b > 0 ? b : a;
-     const areaOut = a * h;
-     const areaIn = (a - 2*t) * (h - 2*t);
-     area_m2 = areaOut - (areaIn > 0 ? areaIn : 0);
-  }
-  else if (assortment === "Балка/двутавр") {
-     if (t > 0) area_m2 = (2 * b * t) + ((a - 2*t) * t);
-     else area_m2 = a * b * 0.5; // Грубая заглушка
+    area_m2 = areaCircleByDiameter(d);
   }
 
-  // 3. Финальный расчет
+  // Квадрат
+  else if (assortment === "Квадрат") {
+    if (isFinitePos(a)) area_m2 = a * a;
+  }
+
+  // Лента
+  else if (assortment === "Лента") {
+    area_m2 = areaStrip(a, t);
+  }
+
+  // Труба круглая
+  else if (assortment === "Труба круглая") {
+    area_m2 = areaRoundTube(d, t);
+  }
+
+  // Труба профильная
+  else if (assortment === "Труба профильная") {
+    area_m2 = areaRectTube(a, b, t);
+  }
+
+  // Если сортамент пока не реализован — 0
+  else {
+    area_m2 = 0;
+  }
+
+  // ----------------------------
+  // 4) Финал: вес/длина
+  // ----------------------------
+  if (!isFinitePos(area_m2) || !isFinitePos(density)) return 0;
+
   if (mode === "weight") {
-     return area_m2 * len * density * qty;
+    if (!isFinitePos(len)) return 0;
+    // Вес = площадь * длина * плотность * количество
+    return area_m2 * len * density * qty;
   } else {
-     if (area_m2 > 0) return weight / (area_m2 * density * qty);
-     return 0;
+    if (!isFinitePos(weight)) return 0;
+    // Длина = вес / (площадь * плотность * количество)
+    return weight / (area_m2 * density * qty);
   }
 }
