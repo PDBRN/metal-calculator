@@ -16,7 +16,7 @@ export default function Calculator() {
   const [assortment, setAssortment] = useState("");
   const [mode, setMode] = useState<Mode>("weight");
 
-  // --- Общие поля (пока оставляем, позже решим где нужны) ---
+  // --- Общие поля ---
   const [steelMark, setSteelMark] = useState("Ст 3");
 
   // --- Балка/двутавр ---
@@ -25,14 +25,14 @@ export default function Calculator() {
 
   // --- Геометрия (мм в UI -> в calc переводим в метры) ---
   const [d, setD] = useState("10"); // диаметр (мм)
-  const [t, setT] = useState("");   // толщина/стенка (мм)
-  const [a, setA] = useState("");   // a (мм)
-  const [b, setB] = useState("");   // b (мм)
+  const [t, setT] = useState(""); // толщина/стенка (мм)
+  const [a, setA] = useState(""); // a (мм)
+  const [b, setB] = useState(""); // b (мм)
 
   // --- Ввод расчёта ---
-  const [len, setLen] = useState("");          // L (м)
+  const [len, setLen] = useState(""); // L (м)
   const [weightInput, setWeightInput] = useState(""); // кг (для режима length)
-  const [qty, setQty] = useState("1");         // шт
+  const [qty, setQty] = useState("1"); // шт
 
   // --- Результат ---
   const [result, setResult] = useState(0);
@@ -55,16 +55,14 @@ export default function Calculator() {
   useEffect(() => {
     setResult(0);
 
-    // Когда выбрали балку — подставим номер по умолчанию
     if (assortment === "Балка/двутавр") {
       const first = beamNumbersOptions[0] || "";
       setBeamNumber(first);
-      // Для балки обычно количество = 1, но оставим поле (можно менять)
       if (!qty) setQty("1");
     }
-  }, [mode, assortment]); // eslint-disable-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, assortment]);
 
-  // Если изменился тип балки — обновляем номер балки на первый доступный
   useEffect(() => {
     if (assortment !== "Балка/двутавр") return;
     const first = beamNumbersOptions[0] || "";
@@ -97,7 +95,6 @@ export default function Calculator() {
 
   // --- Рендер блоков полей по сортаменту ---
   const renderAssortmentFields = () => {
-    // Пусто
     if (!assortment) {
       return (
         <motion.div
@@ -112,7 +109,6 @@ export default function Calculator() {
       );
     }
 
-    // Контент
     return (
       <motion.div
         key={assortment}
@@ -122,7 +118,7 @@ export default function Calculator() {
         transition={{ duration: 0.2 }}
         className="space-y-4"
       >
-        {/* Марка/сплав (пока оставляем везде кроме арматуры — как было) */}
+        {/* Марка/сплав */}
         {assortment !== "Арматура" && assortment !== "Балка/двутавр" && (
           <UiSelect
             label="Марка / Сплав"
@@ -132,10 +128,9 @@ export default function Calculator() {
           />
         )}
 
-        {/* ---- БАЛКА/ДВУТАВР (как у конкурентов — СТОЛБЦОМ) ---- */}
+        {/* ---- БАЛКА/ДВУТАВР ---- */}
         {assortment === "Балка/двутавр" && (
           <div className="space-y-4">
-            {/* 1-я строка: Тип + Номер */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <UiSelect
                 label="Тип балки"
@@ -151,58 +146,57 @@ export default function Calculator() {
                 options={beamNumbersOptions}
               />
 
-              {/* Ввод расчёта (как у конкурентов) */}
               {mode === "weight" ? (
                 <InputField label="Длина L" value={len} onChange={setLen} suffix="м" />
               ) : (
                 <InputField label="Общий вес" value={weightInput} onChange={setWeightInput} suffix="кг" />
               )}
 
-              {/* Количество оставим (не мешает). Если хочешь 1: скрываем вообще. */}
               <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
             </div>
           </div>
         )}
 
-        {/* ---- АРМАТУРА: диаметр по ширине как Длина L ---- */}
+        {/* ---- АРМАТУРА ----
+            Нужно:
+            - Диаметр сверху слева
+            - ниже: Длина/Вес слева, Количество справа
+        */}
         {assortment === "Арматура" && (
           <div className="space-y-4">
-            {/* Диаметр (пол-ширины) + Длина L (пол-ширины) */}
-            {mode === "weight" ? (
-              <div className="grid grid-cols-2 gap-4">
-                <UiSelect
-                  label="Диаметр (мм)"
-                  value={d}
-                  onChange={setD}
-                  options={["6", "8", "10", "12", "14", "16", "20", "25", "32", "36"]}
-                />
-                <InputField label="Длина L" value={len} onChange={setLen} suffix="м" />
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 gap-4">
-                <UiSelect
-                  label="Диаметр (мм)"
-                  value={d}
-                  onChange={setD}
-                  options={["6", "8", "10", "12", "14", "16", "20", "25", "32", "36"]}
-                />
-                <InputField label="Общий вес" value={weightInput} onChange={setWeightInput} suffix="кг" />
-              </div>
-            )}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* 1 ряд (на sm+): Диаметр слева, справа пусто */}
+              <UiSelect
+                label="Диаметр (мм)"
+                value={d}
+                onChange={setD}
+                options={["6", "8", "10", "12", "14", "16", "20", "25", "32", "36"]}
+              />
+              <div className="hidden sm:block" />
 
-            {/* Количество — отдельной строкой */}
+              {/* 2 ряд: слева Длина/Вес, справа Количество */}
+              {mode === "weight" ? (
+                <InputField label="Длина L" value={len} onChange={setLen} suffix="м" />
+              ) : (
+                <InputField label="Общий вес" value={weightInput} onChange={setWeightInput} suffix="кг" />
+              )}
+
+              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+            </div>
+          </div>
+        )}
+
+        {/* ---- Остальные сортаменты ---- */}
+
+        {assortment === "Квадрат" && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <InputField label="Сторона a" value={a} onChange={setA} suffix="мм" />
             <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
           </div>
         )}
 
-        {/* ---- Остальные сортаменты (пока как было) ---- */}
-
-        {assortment === "Квадрат" && (
-          <InputField label="Сторона a" value={a} onChange={setA} suffix="мм" />
-        )}
-
         {(assortment === "Лист/плита" || assortment === "Лента") && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <InputField label="Толщина t" value={t} onChange={setT} suffix="мм" />
             <InputField label="Ширина a" value={a} onChange={setA} suffix="мм" />
             {assortment === "Лист/плита" && (
@@ -212,7 +206,7 @@ export default function Calculator() {
         )}
 
         {assortment === "Труба профильная" && (
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <InputField label="Ширина A" value={a} onChange={setA} suffix="мм" />
             <InputField label="Высота B" value={b} onChange={setB} suffix="мм" />
             <InputField label="Стенка t" value={t} onChange={setT} suffix="мм" />
@@ -220,7 +214,7 @@ export default function Calculator() {
         )}
 
         {(assortment === "Труба круглая" || assortment === "Круг/пруток") && (
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <InputField label="Диаметр D" value={d} onChange={setD} suffix="мм" />
             {assortment === "Труба круглая" ? (
               <InputField label="Стенка t" value={t} onChange={setT} suffix="мм" />
@@ -230,9 +224,9 @@ export default function Calculator() {
           </div>
         )}
 
-        {/* Общий ввод (для тех, кто не арматура и не балка) */}
+        {/* Общий ввод (кроме арматуры и балки) */}
         {assortment !== "Арматура" && assortment !== "Балка/двутавр" && (
-          <div className="grid grid-cols-2 gap-4 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
             {mode === "weight" ? (
               <>
                 {assortment !== "Лист/плита" && (
@@ -292,7 +286,7 @@ export default function Calculator() {
             </div>
 
             {/* Металл / Сортамент */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <UiSelect
                 label="Металл"
                 value={metal}
@@ -332,11 +326,11 @@ export default function Calculator() {
           </div>
 
           {/* ПРАВАЯ КОЛОНКА */}
-          <div className="w-full md:w-[320px] bg-zinc-50 border-t md:border-t-0 md:border-l border-zinc-100 p-6 md:p-8 flex flex-col justify-between relative overflow-hidden">
+          <div className="order-last md:order-none w-full md:w-[320px] bg-zinc-50 border-t md:border-t-0 md:border-l border-zinc-100 p-4 sm:p-6 md:p-8 flex flex-col justify-between relative overflow-hidden">
             <div className="absolute top-0 right-0 -mt-10 -mr-10 h-40 w-40 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
 
-            <div className="relative z-10 flex-1 flex items-center justify-center py-6">
-              <div className="w-[260px] h-[260px] flex items-center justify-center">
+            <div className="relative z-10 flex items-center justify-center py-4 md:py-6">
+              <div className="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] flex items-center justify-center">
                 <AssortmentScheme assortment={assortment} d={d} a={a} b={b} t={t} />
               </div>
             </div>
@@ -347,7 +341,7 @@ export default function Calculator() {
               </div>
 
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl font-black text-blue-600 tracking-tight">
+                <span className="text-3xl sm:text-4xl font-black text-blue-600 tracking-tight">
                   {fmtNum(result)}
                 </span>
                 <span className="text-lg font-bold text-zinc-400">
