@@ -240,14 +240,44 @@ export default function Calculator() {
 )}
 
 
-        {/* ---- ЛИСТ/ПЛИТА и ЛЕНТА ---- */}
-        {(assortment === "Лист/плита" || assortment === "Лента") && (
+{/* ---- ЛЕНТА ---- */}
+{assortment === "Лента" && (
+  <div className="space-y-4">
+    <UiSelect
+      label="Марка стали"
+      value={steelMark}
+      onChange={setSteelMark}
+      options={STEEL_GRADES as unknown as string[]}
+    />
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <InputField label="Толщина t" value={t} onChange={setT} suffix="мм" />
+      <InputField label="Ширина a" value={a} onChange={setA} suffix="мм" />
+    </div>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {mode === "weight" ? (
+        <InputField label="Длина L" value={len} onChange={setLen} suffix="м" />
+      ) : (
+        <InputField
+          label="Общий вес"
+          value={weightInput}
+          onChange={setWeightInput}
+          suffix="кг"
+        />
+      )}
+      <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+    </div>
+  </div>
+)}
+
+
+        {/* ---- ЛИСТ/ПЛИТА ---- */}
+        {assortment === "Лист/плита" && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <InputField label="Толщина t" value={t} onChange={setT} suffix="мм" />
             <InputField label="Ширина a" value={a} onChange={setA} suffix="мм" />
-            {assortment === "Лист/плита" && (
-              <InputField label="Длина b" value={b} onChange={setB} suffix="мм" />
-            )}
+            <InputField label="Длина b" value={b} onChange={setB} suffix="мм" />
           </div>
         )}
 
@@ -275,7 +305,8 @@ export default function Calculator() {
         {/* ---- Общий ввод (кроме арматуры, балки и квадрата) ---- */}
         {assortment !== "Арматура" &&
           assortment !== "Балка/двутавр" &&
-          assortment !== "Квадрат" && (
+          assortment !== "Квадрат" &&
+          assortment !== "Лента" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               {mode === "weight" ? (
                 <>
@@ -386,7 +417,13 @@ export default function Calculator() {
 
             <div className="relative z-10 flex items-center justify-center py-4 md:py-6">
               <div className="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] flex items-center justify-center">
-                <AssortmentScheme assortment={assortment} d={d} a={a} b={b} t={t} />
+                <AssortmentScheme
+                  assortment={assortment}
+                  d={d}
+                  a={a}
+                  b={assortment === "Лента" ? len : b}
+                  t={t}
+                />
               </div>
             </div>
 
