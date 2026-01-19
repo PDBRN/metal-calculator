@@ -137,16 +137,12 @@ export function calculateResult(
   // 2) Лист/плита — ОБЪЕМНЫЙ РАСЧЕТ
   // ----------------------------
   if (assortment === "Лист/плита") {
-    if (mode === "weight") {
-      return weightPlate(t, a, b, density, qty);
-    }
-    // Если в будущем захотите считать "длину" по весу для листа — нужно определить,
-    // что именно мы считаем длиной: b при фиксированных t и a.
-    // Тогда b = weight / (density * t * a * qty)
-    // Сейчас делаю логично:
-    if (!isFinitePos(weight) || !isFinitePos(t) || !isFinitePos(a) || !isFinitePos(density)) return 0;
-    return weight / (density * t * a * qty);
+  // Вес листа = t * a * b * density * qty
+  // (всё в метрах, density в кг/м3)
+  return weightPlate(t, a, b, density, qty);
   }
+
+
 
   // ----------------------------
   // 3) Остальные сортаменты — через площадь сечения
@@ -197,4 +193,12 @@ export function calculateResult(
     // Длина = вес / (площадь * плотность * количество)
     return weight / (area_m2 * density * qty);
   }
+}
+
+export function calcPlateArea(a: number, b: number, qty: number) {
+  const A = clampNonNegative(a);
+  const B = clampNonNegative(b);
+  const Q = isFinitePos(qty) ? qty : 1;
+  if (!isFinitePos(A) || !isFinitePos(B)) return 0;
+  return A * B * Q; // м2
 }

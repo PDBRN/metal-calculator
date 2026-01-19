@@ -11,7 +11,7 @@ import {
   BEAM_NUMBERS_BY_TYPE,
   STEEL_GRADES,
 } from "./data";
-import { calculateResult } from "./calc";
+import { calculateResult, calcPlateArea } from "./calc";
 import AssortmentScheme from "./schemes";
 
 type Mode = "weight" | "length";
@@ -43,6 +43,8 @@ export default function Calculator() {
 
   // --- Результат ---
   const [result, setResult] = useState(0);
+
+  const [area, setArea] = useState(0);
 
   // Список сортамента по металлу
   const availableAssortments = useMemo(() => METAL_DATA[metal] || [], [metal]);
@@ -102,6 +104,13 @@ export default function Calculator() {
 
     const res = calculateResult(mode, metal, assortment, inputs as any);
     setResult(res);
+
+    if (assortment === "Лист/плита") {
+      const plateArea = calcPlateArea(inputs.a, inputs.b, inputs.qty ?? 1);
+      setArea(plateArea);
+    } else {
+      setArea(0);
+  }
   };
 
   // --- Рендер блоков полей по сортаменту ---
@@ -274,12 +283,26 @@ export default function Calculator() {
 
         {/* ---- ЛИСТ/ПЛИТА ---- */}
         {assortment === "Лист/плита" && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <InputField label="Толщина t" value={t} onChange={setT} suffix="мм" />
-            <InputField label="Ширина a" value={a} onChange={setA} suffix="мм" />
-            <InputField label="Длина b" value={b} onChange={setB} suffix="мм" />
-          </div>
-        )}
+  <div className="space-y-4">
+    <UiSelect
+      label="Марка стали"
+      value={steelMark}
+      onChange={setSteelMark}
+      options={STEEL_GRADES as unknown as string[]}
+    />
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <InputField label="Толщина t" value={t} onChange={setT} suffix="мм" />
+      <InputField label="Ширина a" value={a} onChange={setA} suffix="мм" />
+    </div>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <InputField label="Длина b" value={b} onChange={setB} suffix="мм" />
+      <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+    </div>
+  </div>
+)}
+
 
         {/* ---- ТРУБА ПРОФИЛЬНАЯ ---- */}
         {assortment === "Труба профильная" && (
@@ -306,7 +329,8 @@ export default function Calculator() {
         {assortment !== "Арматура" &&
           assortment !== "Балка/двутавр" &&
           assortment !== "Квадрат" &&
-          assortment !== "Лента" && (
+          assortment !== "Лента" &&
+          assortment !== "Лист/плита" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               {mode === "weight" ? (
                 <>
@@ -438,6 +462,13 @@ export default function Calculator() {
                 </span>
                 <span className="text-lg font-bold text-zinc-400">{mode === "weight" ? "кг" : "м"}</span>
               </div>
+
+              {assortment === "Лист/плита" && mode === "weight" && (
+  <div className="text-sm text-zinc-500">
+    Площадь: <span className="font-semibold text-zinc-800">{area ? area.toFixed(2) : 0}</span> м²
+  </div>
+)}
+
 
               <div className="text-xs text-zinc-400 mt-2 h-4">
                 {assortment ? `${metal} • ${assortment}` : ""}
