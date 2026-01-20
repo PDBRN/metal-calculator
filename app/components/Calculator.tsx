@@ -381,6 +381,34 @@ export default function Calculator() {
   </div>
 )}
 
+{/* ---- УГОЛОК ---- */}
+{assortment === "Уголок" && (
+  <div className="space-y-4">
+    <UiSelect
+      label="Марка стали"
+      value={steelMark}
+      onChange={setSteelMark}
+      options={STEEL_GRADES as unknown as string[]}
+    />
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <InputField label="Ширина полки a" value={a} onChange={setA} suffix="мм" />
+      <InputField label="Высота полки b" value={b} onChange={setB} suffix="мм" />
+    </div>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <InputField label="Толщина полки t" value={t} onChange={setT} suffix="мм" />
+      <div className="hidden sm:block" />
+    </div>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <InputField label="Длина L" value={len} onChange={setLen} suffix="м" />
+      <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+    </div>
+  </div>
+)}
+
+
 
         {/* ---- Общий ввод (кроме арматуры, балки и квадрата) ---- */}
         {assortment !== "Арматура" &&
@@ -389,7 +417,8 @@ export default function Calculator() {
           assortment !== "Лента" &&
           assortment !== "Лист/плита" &&
           assortment !== "Труба круглая" &&
-          assortment !== "Труба профильная" && (
+          assortment !== "Труба профильная" &&
+          assortment !== "Уголок" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               {mode === "weight" ? (
                 <>

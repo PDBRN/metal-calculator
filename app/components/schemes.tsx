@@ -391,6 +391,61 @@ export default function AssortmentScheme({ assortment, d, a, b, t }: SchemeProps
     );
   }
 
+if (assortment === "Уголок") {
+  const w = 120;
+  const h = 120;
+  const tPx = 28;
+
+  return (
+    <Wrapper>
+      <path
+        d={`
+          M ${center - w / 2},${center - h / 2}
+          H ${center - w / 2 + tPx}
+          V ${center + h / 2 - tPx}
+          H ${center + w / 2}
+          V ${center + h / 2}
+          H ${center - w / 2}
+          Z
+        `}
+        fill="url(#hatch)"
+        stroke={strokeColor}
+        strokeWidth="2"
+      />
+
+      <Dim
+        x1={center - w / 2}
+        y1={center + h / 2}
+        x2={center + w / 2}
+        y2={center + h / 2}
+        label={`a ${a || "?"}`}
+        offset={25}
+      />
+
+      <Dim
+        x1={center - w / 2}
+        y1={center - h / 2}
+        x2={center - w / 2}
+        y2={center + h / 2}
+        label={`b ${b || "?"}`}
+        offset={-25}
+        vertical
+      />
+
+      <text
+        x={center - w / 2 + tPx + 6}
+        y={center}
+        fill={dimColor}
+        fontSize="11"
+        fontWeight="700"
+      >
+        t {t || "?"}
+      </text>
+    </Wrapper>
+  );
+}
+
+
   // ---- ПЛЕЙСХОЛДЕР ----
   return (
     <div className="w-40 h-40 border-2 border-dashed border-zinc-200 rounded-xl flex items-center justify-center text-zinc-300">

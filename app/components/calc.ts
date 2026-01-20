@@ -174,6 +174,14 @@ export function calculateResult(
     area_m2 = areaRectTube(a, b, t);
   }
 
+  // Уголок
+else if (assortment === "Уголок") {
+  if (isFinitePos(a) && isFinitePos(b) && isFinitePos(t)) {
+    area_m2 = t * (a + b - t);
+  }
+}
+
+
   // Если сортамент пока не реализован — 0
   else {
     area_m2 = 0;
