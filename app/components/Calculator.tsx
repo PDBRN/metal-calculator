@@ -304,14 +304,43 @@ export default function Calculator() {
 )}
 
 
-        {/* ---- ТРУБА ПРОФИЛЬНАЯ ---- */}
-        {assortment === "Труба профильная" && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <InputField label="Ширина A" value={a} onChange={setA} suffix="мм" />
-            <InputField label="Высота B" value={b} onChange={setB} suffix="мм" />
-            <InputField label="Стенка t" value={t} onChange={setT} suffix="мм" />
-          </div>
-        )}
+ {/* ---- ТРУБА ПРОФИЛЬНАЯ ---- */}
+{assortment === "Труба профильная" && (
+  <div className="space-y-4">
+    <UiSelect
+      label="Марка стали"
+      value={steelMark}
+      onChange={setSteelMark}
+      options={STEEL_GRADES as unknown as string[]}
+    />
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <InputField label="Ширина A" value={a} onChange={setA} suffix="мм" />
+      <InputField label="Высота B" value={b} onChange={setB} suffix="мм" />
+    </div>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <InputField label="Стенка t" value={t} onChange={setT} suffix="мм" />
+      <div className="hidden sm:block" />
+    </div>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {mode === "weight" ? (
+        <InputField label="Длина L" value={len} onChange={setLen} suffix="м" />
+      ) : (
+        <InputField
+          label="Общий вес"
+          value={weightInput}
+          onChange={setWeightInput}
+          suffix="кг"
+        />
+      )}
+      <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+    </div>
+  </div>
+)}
+
+
 
         {/* ---- ТРУБА КРУГЛАЯ ---- */}
 {assortment === "Труба круглая" && (
@@ -359,7 +388,8 @@ export default function Calculator() {
           assortment !== "Квадрат" &&
           assortment !== "Лента" &&
           assortment !== "Лист/плита" &&
-          assortment !== "Труба круглая" && (
+          assortment !== "Труба круглая" &&
+          assortment !== "Труба профильная" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               {mode === "weight" ? (
                 <>
