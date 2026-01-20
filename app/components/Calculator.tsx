@@ -313,24 +313,53 @@ export default function Calculator() {
           </div>
         )}
 
-        {/* ---- ТРУБА КРУГЛАЯ / КРУГ / ПРУТОК ---- */}
-        {(assortment === "Труба круглая" || assortment === "Круг/пруток") && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <InputField label="Диаметр D" value={d} onChange={setD} suffix="мм" />
-            {assortment === "Труба круглая" ? (
-              <InputField label="Стенка t" value={t} onChange={setT} suffix="мм" />
-            ) : (
-              <div className="hidden sm:block" />
-            )}
-          </div>
-        )}
+        {/* ---- ТРУБА КРУГЛАЯ ---- */}
+{assortment === "Труба круглая" && (
+  <div className="space-y-4">
+    <UiSelect
+      label="Марка стали"
+      value={steelMark}
+      onChange={setSteelMark}
+      options={STEEL_GRADES as unknown as string[]}
+    />
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <InputField label="Внешний диаметр D" value={d} onChange={setD} suffix="мм" />
+      <InputField label="Толщина стенки t" value={t} onChange={setT} suffix="мм" />
+    </div>
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {mode === "weight" ? (
+        <InputField label="Длина L" value={len} onChange={setLen} suffix="м" />
+      ) : (
+        <InputField
+          label="Общий вес"
+          value={weightInput}
+          onChange={setWeightInput}
+          suffix="кг"
+        />
+      )}
+      <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+    </div>
+  </div>
+)}
+
+{/* ---- КРУГ/ПРУТОК (оставляем отдельно как было) ---- */}
+{assortment === "Круг/пруток" && (
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <InputField label="Диаметр D" value={d} onChange={setD} suffix="мм" />
+    <div className="hidden sm:block" />
+  </div>
+)}
+
 
         {/* ---- Общий ввод (кроме арматуры, балки и квадрата) ---- */}
         {assortment !== "Арматура" &&
           assortment !== "Балка/двутавр" &&
           assortment !== "Квадрат" &&
           assortment !== "Лента" &&
-          assortment !== "Лист/плита" && (
+          assortment !== "Лист/плита" &&
+          assortment !== "Труба круглая" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               {mode === "weight" ? (
                 <>
