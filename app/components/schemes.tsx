@@ -547,7 +547,52 @@ if (assortment === "Швеллер") {
   );
 }
 
+if (assortment === "Шестигранник") {
+  const A = a || "?";
 
+  const R = 70;
+  const cx = center;
+  const cy = center;
+
+  const points = Array.from({ length: 6 }).map((_, i) => {
+    const ang = (Math.PI / 3) * i; // плоский верх/низ
+    return {
+      x: cx + R * Math.cos(ang),
+      y: cy + R * Math.sin(ang),
+    };
+  });
+
+  const ptsStr = points.map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(" ");
+
+  const yMin = Math.min(...points.map(p => p.y));
+  const yMax = Math.max(...points.map(p => p.y));
+
+  const EPS = 1e-6;
+  const xAtTop = Math.min(...points.filter(p => Math.abs(p.y - yMin) < EPS).map(p => p.x));
+  const xAtBot = Math.min(...points.filter(p => Math.abs(p.y - yMax) < EPS).map(p => p.x));
+  const xTouch = Math.min(xAtTop, xAtBot);
+
+  return (
+    <Wrapper>
+      <polygon
+        points={ptsStr}
+        fill="url(#hatch)"
+        stroke={strokeColor}
+        strokeWidth="2"
+      />
+
+      <Dim
+        x1={xTouch}
+        y1={yMin}
+        x2={xTouch}
+        y2={yMax}
+        label={`a ${A}`}
+        offset={-50}   // <-- БЫЛО -25, СТАВЬ -35/-40 как в примерах
+        vertical
+      />
+    </Wrapper>
+  );
+}
 
 
   // ---- ПЛЕЙСХОЛДЕР ----

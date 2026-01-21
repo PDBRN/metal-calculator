@@ -196,6 +196,14 @@ else if (assortment === "Швеллер") {
   return weight / (kgPerM * qty);
 }
 
+// Шестигранник: a — размер между гранями (мм в UI -> м в calc)
+else if (assortment === "Шестигранник") {
+  if (isFinitePos(a)) {
+    area_m2 = (Math.sqrt(3) / 2) * a * a;
+  }
+}
+
+
   // Если сортамент пока не реализован — 0
   else {
     area_m2 = 0;
