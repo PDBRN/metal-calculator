@@ -1,4 +1,4 @@
-import { DENSITIES, BEAM_KG_PER_M, STEEL_GRADE_DENSITY } from "./data";
+import { DENSITIES, BEAM_KG_PER_M, STEEL_GRADE_DENSITY, CHANNEL_KG_PER_M } from "./data";
 
 export type CalcMode = "weight" | "length";
 
@@ -22,6 +22,10 @@ export type CalcInputs = {
   // Балка / двутавр (табличный расчет)
   beamType?: string;
   beamNumber?: string;
+
+  // Швеллер
+  channelNumber?: string;
+
 };
 
 function isFinitePos(n: number) {
@@ -181,6 +185,16 @@ else if (assortment === "Уголок") {
   }
 }
 
+else if (assortment === "Швеллер") {
+  const kgPerM = CHANNEL_KG_PER_M[inputs.channelNumber ?? ""];
+  if (!kgPerM) return 0;
+
+  if (mode === "weight") {
+    return kgPerM * len * qty;
+  }
+
+  return weight / (kgPerM * qty);
+}
 
   // Если сортамент пока не реализован — 0
   else {

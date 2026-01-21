@@ -446,6 +446,110 @@ if (assortment === "Уголок") {
 }
 
 
+if (assortment === "Швеллер") {
+  const num = (d || "").toUpperCase();      // сюда мы прокидываем channelNumber
+  const isU = num.includes("У");
+  const label = num || "Швеллер";
+
+  // размеры в пикселях
+  const H = 150;   // высота
+  const B = 95;    // ширина полок
+  const s = 18;    // стенка
+  const tFl = 22;  // полки
+  const x0 = center - B / 2;
+  const y0 = center - H / 2;
+  const x1 = x0 + B;
+  const y1 = y0 + H;
+
+  // внешний контур "П"
+  const outer =
+    `M ${x0},${y0} ` +
+    `H ${x1} ` +
+    `V ${y0 + tFl} ` +
+    `H ${x0 + s} ` +
+    `V ${y1 - tFl} ` +
+    `H ${x1} ` +
+    `V ${y1} ` +
+    `H ${x0} ` +
+    `Z`;
+
+  // внутренний контур (дырка) — одинаковый для П и У, только у "У" сделаем наклон линиями
+  const innerX = x0 + s;
+  const innerTopY = y0 + tFl;
+  const innerBotY = y1 - tFl;
+  const innerRightX = x1 - 10;
+
+  const inner =
+    `M ${innerX},${innerTopY} ` +
+    `H ${innerRightX} ` +
+    `V ${innerBotY} ` +
+    `H ${innerX} ` +
+    `Z`;
+
+  return (
+    <Wrapper>
+      {/* тело */}
+      <path
+        d={`${outer} ${inner}`}
+        fill="url(#hatch)"
+        stroke={strokeColor}
+        strokeWidth="2"
+        fillRule="evenodd"
+      />
+
+      {/* размер по высоте */}
+      <Dim
+        x1={x0}
+        y1={y0}
+        x2={x0}
+        y2={y1}
+        label={label}
+        offset={-25}
+        vertical
+      />
+
+      {/* уклон полок (для У) — просто две диагональные подсказки внутри, без ломания геометрии */}
+      {isU && (
+        <>
+          <line
+            x1={innerX + 6}
+            y1={innerTopY + 6}
+            x2={innerX + 26}
+            y2={innerTopY + 2}
+            stroke={strokeColor}
+            strokeWidth="2"
+            opacity="0.8"
+          />
+          <line
+            x1={innerX + 6}
+            y1={innerBotY - 6}
+            x2={innerX + 26}
+            y2={innerBotY - 2}
+            stroke={strokeColor}
+            strokeWidth="2"
+            opacity="0.8"
+          />
+        </>
+      )}
+
+      {/* подпись типа снизу */}
+      <text
+        x={center}
+        y={y1 + 28}
+        textAnchor="middle"
+        fill={dimColor}
+        fontSize="12"
+        fontWeight="800"
+      >
+        {isU ? "У (уклон полок)" : "П (параллельные полки)"}
+      </text>
+    </Wrapper>
+  );
+}
+
+
+
+
   // ---- ПЛЕЙСХОЛДЕР ----
   return (
     <div className="w-40 h-40 border-2 border-dashed border-zinc-200 rounded-xl flex items-center justify-center text-zinc-300">

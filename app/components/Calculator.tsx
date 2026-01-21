@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { CHANNEL_KG_PER_M } from "./data";
 
 import { cn, fmtNum, toNum, UiSelect, InputField } from "./ui";
 import {
@@ -29,6 +30,10 @@ export default function Calculator() {
   // --- Балка/двутавр ---
   const [beamType, setBeamType] = useState("GOST_8239_89");
   const [beamNumber, setBeamNumber] = useState("");
+
+  // --- Швеллер ---
+  const [channelNumber, setChannelNumber] = useState("20П");
+
 
   // --- Геометрия (мм в UI -> в calc переводим в метры) ---
   const [d, setD] = useState("10"); // диаметр (мм)
@@ -100,6 +105,7 @@ export default function Calculator() {
       steelMark,
       beamType,
       beamNumber,
+      channelNumber,
     };
 
     const res = calculateResult(mode, metal, assortment, inputs as any);
@@ -408,6 +414,33 @@ export default function Calculator() {
   </div>
 )}
 
+{/* ---- ШВЕЛЛЕР ---- */}
+{assortment === "Швеллер" && (
+  <div className="space-y-4">
+    <UiSelect
+      label="Номер швеллера"
+      value={channelNumber}
+      onChange={setChannelNumber}
+      options={Object.keys(CHANNEL_KG_PER_M)}
+    />
+
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {mode === "weight" ? (
+        <InputField label="Длина L" value={len} onChange={setLen} suffix="м" />
+      ) : (
+        <InputField
+          label="Общий вес"
+          value={weightInput}
+          onChange={setWeightInput}
+          suffix="кг"
+        />
+      )}
+      <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+    </div>
+  </div>
+)}
+
+
 
 
         {/* ---- Общий ввод (кроме арматуры, балки и квадрата) ---- */}
@@ -418,7 +451,8 @@ export default function Calculator() {
           assortment !== "Лист/плита" &&
           assortment !== "Труба круглая" &&
           assortment !== "Труба профильная" &&
-          assortment !== "Уголок" && (
+          assortment !== "Уголок" &&
+          assortment !== "Швеллер" && (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
               {mode === "weight" ? (
                 <>
@@ -531,7 +565,7 @@ export default function Calculator() {
               <div className="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] flex items-center justify-center">
                 <AssortmentScheme
                   assortment={assortment}
-                  d={d}
+                  d={assortment === "Швеллер" ? channelNumber : d}
                   a={a}
                   b={assortment === "Лента" ? len : b}
                   t={t}
