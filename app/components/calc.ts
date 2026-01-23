@@ -210,8 +210,6 @@ export function calculateResult(
         ? ELBOW_KG_PER_PIECE_EXEC2
         : ELBOW_KG_PER_PIECE_EXEC1;
 
-      // @ts-ignore - size might not exist in table if types mismatch, 
-      // but we'll ensure they match in UI
       const kg = table[inputs.elbowSize] || 0;
       return kg * qty;
     }
