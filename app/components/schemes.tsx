@@ -257,13 +257,10 @@ export default function AssortmentScheme({ assortment, d, a, b, t }: SchemeProps
     const x = center - w / 2;
     const y = center - h / 2;
 
-    const path = `M ${x},${y} L ${x + w},${y} L ${x + w},${y + th} L ${center + th / 2},${
-      y + th
-    } L ${center + th / 2},${y + h - th} L ${x + w},${y + h - th} L ${x + w},${
-      y + h
-    } L ${x},${y + h} L ${x},${y + h - th} L ${center - th / 2},${y + h - th} L ${
-      center - th / 2
-    },${y + th} L ${x},${y + th} Z`;
+    const path = `M ${x},${y} L ${x + w},${y} L ${x + w},${y + th} L ${center + th / 2},${y + th
+      } L ${center + th / 2},${y + h - th} L ${x + w},${y + h - th} L ${x + w},${y + h
+      } L ${x},${y + h} L ${x},${y + h - th} L ${center - th / 2},${y + h - th} L ${center - th / 2
+      },${y + th} L ${x},${y + th} Z`;
 
     return (
       <Wrapper>
@@ -391,15 +388,15 @@ export default function AssortmentScheme({ assortment, d, a, b, t }: SchemeProps
     );
   }
 
-if (assortment === "Уголок") {
-  const w = 120;
-  const h = 120;
-  const tPx = 28;
+  if (assortment === "Уголок") {
+    const w = 120;
+    const h = 120;
+    const tPx = 28;
 
-  return (
-    <Wrapper>
-      <path
-        d={`
+    return (
+      <Wrapper>
+        <path
+          d={`
           M ${center - w / 2},${center - h / 2}
           H ${center - w / 2 + tPx}
           V ${center + h / 2 - tPx}
@@ -408,191 +405,258 @@ if (assortment === "Уголок") {
           H ${center - w / 2}
           Z
         `}
-        fill="url(#hatch)"
-        stroke={strokeColor}
-        strokeWidth="2"
-      />
+          fill="url(#hatch)"
+          stroke={strokeColor}
+          strokeWidth="2"
+        />
 
-      <Dim
-        x1={center - w / 2}
-        y1={center + h / 2}
-        x2={center + w / 2}
-        y2={center + h / 2}
-        label={`a ${a || "?"}`}
-        offset={25}
-      />
+        <Dim
+          x1={center - w / 2}
+          y1={center + h / 2}
+          x2={center + w / 2}
+          y2={center + h / 2}
+          label={`a ${a || "?"}`}
+          offset={25}
+        />
 
-      <Dim
-        x1={center - w / 2}
-        y1={center - h / 2}
-        x2={center - w / 2}
-        y2={center + h / 2}
-        label={`b ${b || "?"}`}
-        offset={-25}
-        vertical
-      />
+        <Dim
+          x1={center - w / 2}
+          y1={center - h / 2}
+          x2={center - w / 2}
+          y2={center + h / 2}
+          label={`b ${b || "?"}`}
+          offset={-25}
+          vertical
+        />
 
-      <text
-        x={center - w / 2 + tPx + 6}
-        y={center}
-        fill={dimColor}
-        fontSize="11"
-        fontWeight="700"
-      >
-        t {t || "?"}
-      </text>
-    </Wrapper>
-  );
-}
+        <text
+          x={center - w / 2 + tPx + 6}
+          y={center}
+          fill={dimColor}
+          fontSize="11"
+          fontWeight="700"
+        >
+          t {t || "?"}
+        </text>
+      </Wrapper>
+    );
+  }
 
 
-if (assortment === "Швеллер") {
-  const num = (d || "").toUpperCase();      // сюда мы прокидываем channelNumber
-  const isU = num.includes("У");
-  const label = num || "Швеллер";
+  if (assortment === "Швеллер") {
+    const num = (d || "").toUpperCase();      // сюда мы прокидываем channelNumber
+    const isU = num.includes("У");
+    const label = num || "Швеллер";
 
-  // размеры в пикселях
-  const H = 150;   // высота
-  const B = 95;    // ширина полок
-  const s = 18;    // стенка
-  const tFl = 22;  // полки
-  const x0 = center - B / 2;
-  const y0 = center - H / 2;
-  const x1 = x0 + B;
-  const y1 = y0 + H;
+    // размеры в пикселях
+    const H = 150;   // высота
+    const B = 95;    // ширина полок
+    const s = 18;    // стенка
+    const tFl = 22;  // полки
+    const x0 = center - B / 2;
+    const y0 = center - H / 2;
+    const x1 = x0 + B;
+    const y1 = y0 + H;
 
-  // внешний контур "П"
-  const outer =
-    `M ${x0},${y0} ` +
-    `H ${x1} ` +
-    `V ${y0 + tFl} ` +
-    `H ${x0 + s} ` +
-    `V ${y1 - tFl} ` +
-    `H ${x1} ` +
-    `V ${y1} ` +
-    `H ${x0} ` +
-    `Z`;
+    // внешний контур "П"
+    const outer =
+      `M ${x0},${y0} ` +
+      `H ${x1} ` +
+      `V ${y0 + tFl} ` +
+      `H ${x0 + s} ` +
+      `V ${y1 - tFl} ` +
+      `H ${x1} ` +
+      `V ${y1} ` +
+      `H ${x0} ` +
+      `Z`;
 
-  // внутренний контур (дырка) — одинаковый для П и У, только у "У" сделаем наклон линиями
-  const innerX = x0 + s;
-  const innerTopY = y0 + tFl;
-  const innerBotY = y1 - tFl;
-  const innerRightX = x1 - 10;
+    // внутренний контур (дырка) — одинаковый для П и У, только у "У" сделаем наклон линиями
+    const innerX = x0 + s;
+    const innerTopY = y0 + tFl;
+    const innerBotY = y1 - tFl;
+    const innerRightX = x1 - 10;
 
-  const inner =
-    `M ${innerX},${innerTopY} ` +
-    `H ${innerRightX} ` +
-    `V ${innerBotY} ` +
-    `H ${innerX} ` +
-    `Z`;
+    const inner =
+      `M ${innerX},${innerTopY} ` +
+      `H ${innerRightX} ` +
+      `V ${innerBotY} ` +
+      `H ${innerX} ` +
+      `Z`;
 
-  return (
-    <Wrapper>
-      {/* тело */}
-      <path
-        d={`${outer} ${inner}`}
-        fill="url(#hatch)"
-        stroke={strokeColor}
-        strokeWidth="2"
-        fillRule="evenodd"
-      />
+    return (
+      <Wrapper>
+        {/* тело */}
+        <path
+          d={`${outer} ${inner}`}
+          fill="url(#hatch)"
+          stroke={strokeColor}
+          strokeWidth="2"
+          fillRule="evenodd"
+        />
 
-      {/* размер по высоте */}
-      <Dim
-        x1={x0}
-        y1={y0}
-        x2={x0}
-        y2={y1}
-        label={label}
-        offset={-25}
-        vertical
-      />
+        {/* размер по высоте */}
+        <Dim
+          x1={x0}
+          y1={y0}
+          x2={x0}
+          y2={y1}
+          label={label}
+          offset={-25}
+          vertical
+        />
 
-      {/* уклон полок (для У) — просто две диагональные подсказки внутри, без ломания геометрии */}
-      {isU && (
-        <>
-          <line
-            x1={innerX + 6}
-            y1={innerTopY + 6}
-            x2={innerX + 26}
-            y2={innerTopY + 2}
-            stroke={strokeColor}
-            strokeWidth="2"
-            opacity="0.8"
-          />
-          <line
-            x1={innerX + 6}
-            y1={innerBotY - 6}
-            x2={innerX + 26}
-            y2={innerBotY - 2}
-            stroke={strokeColor}
-            strokeWidth="2"
-            opacity="0.8"
-          />
-        </>
-      )}
+        {/* уклон полок (для У) — просто две диагональные подсказки внутри, без ломания геометрии */}
+        {isU && (
+          <>
+            <line
+              x1={innerX + 6}
+              y1={innerTopY + 6}
+              x2={innerX + 26}
+              y2={innerTopY + 2}
+              stroke={strokeColor}
+              strokeWidth="2"
+              opacity="0.8"
+            />
+            <line
+              x1={innerX + 6}
+              y1={innerBotY - 6}
+              x2={innerX + 26}
+              y2={innerBotY - 2}
+              stroke={strokeColor}
+              strokeWidth="2"
+              opacity="0.8"
+            />
+          </>
+        )}
 
-      {/* подпись типа снизу */}
-      <text
-        x={center}
-        y={y1 + 28}
-        textAnchor="middle"
-        fill={dimColor}
-        fontSize="12"
-        fontWeight="800"
-      >
-        {isU ? "У (уклон полок)" : "П (параллельные полки)"}
-      </text>
-    </Wrapper>
-  );
-}
+        {/* подпись типа снизу */}
+        <text
+          x={center}
+          y={y1 + 28}
+          textAnchor="middle"
+          fill={dimColor}
+          fontSize="12"
+          fontWeight="800"
+        >
+          {isU ? "У (уклон полок)" : "П (параллельные полки)"}
+        </text>
+      </Wrapper>
+    );
+  }
 
-if (assortment === "Шестигранник") {
-  const A = a || "?";
+  if (assortment === "Шестигранник") {
+    const A = a || "?";
 
-  const R = 70;
-  const cx = center;
-  const cy = center;
+    const R = 70;
+    const cx = center;
+    const cy = center;
 
-  const points = Array.from({ length: 6 }).map((_, i) => {
-    const ang = (Math.PI / 3) * i; // плоский верх/низ
-    return {
-      x: cx + R * Math.cos(ang),
-      y: cy + R * Math.sin(ang),
-    };
-  });
+    const points = Array.from({ length: 6 }).map((_, i) => {
+      const ang = (Math.PI / 3) * i; // плоский верх/низ
+      return {
+        x: cx + R * Math.cos(ang),
+        y: cy + R * Math.sin(ang),
+      };
+    });
 
-  const ptsStr = points.map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(" ");
+    const ptsStr = points.map(p => `${p.x.toFixed(2)},${p.y.toFixed(2)}`).join(" ");
 
-  const yMin = Math.min(...points.map(p => p.y));
-  const yMax = Math.max(...points.map(p => p.y));
+    const yMin = Math.min(...points.map(p => p.y));
+    const yMax = Math.max(...points.map(p => p.y));
 
-  const EPS = 1e-6;
-  const xAtTop = Math.min(...points.filter(p => Math.abs(p.y - yMin) < EPS).map(p => p.x));
-  const xAtBot = Math.min(...points.filter(p => Math.abs(p.y - yMax) < EPS).map(p => p.x));
-  const xTouch = Math.min(xAtTop, xAtBot);
+    const EPS = 1e-6;
+    const xAtTop = Math.min(...points.filter(p => Math.abs(p.y - yMin) < EPS).map(p => p.x));
+    const xAtBot = Math.min(...points.filter(p => Math.abs(p.y - yMax) < EPS).map(p => p.x));
+    const xTouch = Math.min(xAtTop, xAtBot);
 
-  return (
-    <Wrapper>
-      <polygon
-        points={ptsStr}
-        fill="url(#hatch)"
-        stroke={strokeColor}
-        strokeWidth="2"
-      />
+    return (
+      <Wrapper>
+        <polygon
+          points={ptsStr}
+          fill="url(#hatch)"
+          stroke={strokeColor}
+          strokeWidth="2"
+        />
 
-      <Dim
-        x1={xTouch}
-        y1={yMin}
-        x2={xTouch}
-        y2={yMax}
-        label={`a ${A}`}
-        offset={-50}   // <-- БЫЛО -25, СТАВЬ -35/-40 как в примерах
-        vertical
-      />
-    </Wrapper>
-  );
-}
+        <Dim
+          x1={xTouch}
+          y1={yMin}
+          x2={xTouch}
+          y2={yMax}
+          label={`a ${A}`}
+          offset={-50}   // <-- БЫЛО -25, СТАВЬ -35/-40 как в примерах
+          vertical
+        />
+      </Wrapper>
+    );
+  }
+
+
+  if (assortment === "Отвод") {
+    const R = 85;
+    const D_px = 70;
+    const rout = R + D_px / 2;
+    const rin = R - D_px / 2;
+    const off = 45;
+    const x0 = size - off;
+    const y0 = size - off;
+
+    const x_out_bot = x0 - rout;
+    const y_out_bot = y0;
+    const x_in_bot = x0 - rin;
+    const y_in_bot = y0;
+
+    const x_out_right = x0;
+    const y_out_right = y0 - rout;
+    const x_in_right = x0;
+    const y_in_right = y0 - rin;
+
+    // Парсим размер типа "21.3x2"
+    const parts = (d || "").split("x");
+    const dLabel = parts[0] || "?";
+    const sLabel = parts[1] || "";
+
+    return (
+      <Wrapper>
+        {/* Тело отвода */}
+        <path
+          d={`
+          M ${x_out_bot},${y_out_bot}
+          A ${rout},${rout} 0 0 1 ${x_out_right},${y_out_right}
+          L ${x_in_right},${y_in_right}
+          A ${rin},${rin} 0 0 0 ${x_in_bot},${y_in_bot}
+          Z
+        `}
+          fill="url(#hatch)"
+          stroke={strokeColor}
+          strokeWidth="2"
+        />
+
+        {/* Осевая линия */}
+        <path
+          d={`M ${x0 - R},${y0} A ${R},${R} 0 0 1 ${x0},${y0 - R}`}
+          fill="none"
+          stroke="#a1a1aa"
+          strokeWidth="1"
+          strokeDasharray="4,2"
+        />
+
+        {/* Размер D */}
+        <DimDiameter
+          x1={x_out_bot}
+          x2={x_in_bot}
+          yTouch={y_out_bot}
+          yDim={y_out_bot + 25}
+          label={`D ${dLabel}`}
+        />
+
+        {/* Размер S */}
+        <text x={x_in_bot + 10} y={y_in_bot - 10} fill={dimColor} fontSize="12" fontWeight="800">
+          s {sLabel}
+        </text>
+      </Wrapper>
+    );
+  }
 
 
   // ---- ПЛЕЙСХОЛДЕР ----

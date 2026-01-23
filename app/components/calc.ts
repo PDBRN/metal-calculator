@@ -1,4 +1,27 @@
-import { DENSITIES, BEAM_KG_PER_M, STEEL_GRADE_DENSITY, CHANNEL_KG_PER_M } from "./data";
+import {
+  DENSITIES,
+  BEAM_KG_PER_M,
+  STEEL_GRADE_DENSITY,
+  CHANNEL_KG_PER_M,
+  STAINLESS_DENSITIES,
+  ALUMINUM_DENSITIES,
+  COPPER_DENSITIES,
+  BRASS_DENSITIES,
+  BRONZE_DENSITIES,
+  TITAN_DENSITIES,
+  ELBOW_KG_PER_PIECE_EXEC1,
+  ELBOW_KG_PER_PIECE_EXEC2,
+  type Metal,
+  type SteelGrade,
+  type StainlessGrade,
+  type AluminumGrade,
+  type CopperGrade,
+  type BrassGrade,
+  type BronzeGrade,
+  type TitanGrade,
+  type ElbowExecution,
+  type ElbowSize,
+} from "./data";
 
 export type CalcMode = "weight" | "length";
 
@@ -26,6 +49,9 @@ export type CalcInputs = {
   // Швеллер
   channelNumber?: string;
 
+  // Отвод
+  elbowExecution?: ElbowExecution;
+  elbowSize?: ElbowSize;
 };
 
 function isFinitePos(n: number) {
@@ -100,22 +126,107 @@ function beamKgPerM(beamType?: string, beamNumber?: string) {
   return Number.isFinite(v) ? (v as number) : 0;
 }
 
+// Type Guards
+function hasOwn(obj: object, key: string) {
+  return Object.prototype.hasOwnProperty.call(obj, key);
+}
+
+function isSteelGrade(x: string): x is SteelGrade {
+  return hasOwn(STEEL_GRADE_DENSITY, x);
+}
+
+function isStainlessGrade(x: string): x is StainlessGrade {
+  return hasOwn(STAINLESS_DENSITIES, x);
+}
+
+function isAluminumGrade(x: string): x is AluminumGrade {
+  return hasOwn(ALUMINUM_DENSITIES, x);
+}
+
+function isCopperGrade(x: string): x is CopperGrade {
+  return hasOwn(COPPER_DENSITIES, x);
+}
+
+function isBrassGrade(x: string): x is BrassGrade {
+  return hasOwn(BRASS_DENSITIES, x);
+}
+
+function isBronzeGrade(x: string): x is BronzeGrade {
+  return hasOwn(BRONZE_DENSITIES, x);
+}
+
+function isTitanGrade(x: string): x is TitanGrade {
+  return hasOwn(TITAN_DENSITIES, x);
+}
+
+// Helper to safely get density
+function getDensity(metal: Metal, steelMark?: string) {
+  const base = DENSITIES[metal];
+
+  if (metal === "Чёрный" && steelMark && isSteelGrade(steelMark)) {
+    return STEEL_GRADE_DENSITY[steelMark];
+  }
+
+  if (metal === "Нержавейка" && steelMark && isStainlessGrade(steelMark)) {
+    return STAINLESS_DENSITIES[steelMark];
+  }
+
+  if (metal === "Алюминий" && steelMark && isAluminumGrade(steelMark)) {
+    return ALUMINUM_DENSITIES[steelMark];
+  }
+
+  if (metal === "Медь" && steelMark && isCopperGrade(steelMark)) {
+    return COPPER_DENSITIES[steelMark];
+  }
+
+  if (metal === "Латунь" && steelMark && isBrassGrade(steelMark)) {
+    return BRASS_DENSITIES[steelMark];
+  }
+
+  if (metal === "Бронза" && steelMark && isBronzeGrade(steelMark)) {
+    return BRONZE_DENSITIES[steelMark];
+  }
+
+  if (metal === "Титан" && steelMark && isTitanGrade(steelMark)) {
+    return TITAN_DENSITIES[steelMark];
+  }
+
+  return base;
+}
+
 export function calculateResult(
   mode: CalcMode,
-  metal: string,
+  metal: Metal,
   assortment: string,
   inputs: CalcInputs
 ): number {
-  const baseDensity = DENSITIES[metal] || 7850;
+  if (metal === "Нержавейка" && assortment === "Отвод") {
+    const rawQty = inputs.qty;
+    const qty = Number.isFinite(rawQty) ? Math.max(0, rawQty) : 1;
+    if (qty === 0) return 0;
 
-// Плотность по марке стали — только для "Чёрный"
-  const density =
-    metal === "Чёрный" && inputs.steelMark
-      ? (STEEL_GRADE_DENSITY[inputs.steelMark] || baseDensity)
-      : baseDensity;
+    if (mode === "weight" && inputs.elbowSize) {
+      const table = inputs.elbowExecution === "Исполнение 2"
+        ? ELBOW_KG_PER_PIECE_EXEC2
+        : ELBOW_KG_PER_PIECE_EXEC1;
+
+      // @ts-ignore - size might not exist in table if types mismatch, 
+      // but we'll ensure they match in UI
+      const kg = table[inputs.elbowSize] || 0;
+      return kg * qty;
+    }
+    return 0; // Length mode not supported for Elbows
+  }
+
+  const density = getDensity(metal, inputs.steelMark);
 
   // Нормализуем входы (без NaN)
-  const qty = isFinitePos(inputs.qty) ? inputs.qty : 1;
+  // Если qty невалидно (NaN, null, пустая строка в UI -> converted to 0 or NaN) -> считаем как 1 шт.
+  // Если явно 0 — возвращаем 0.
+  const rawQty = inputs.qty;
+  const qty = Number.isFinite(rawQty) ? Math.max(0, rawQty) : 1;
+
+  if (qty === 0) return 0;
 
   const len = clampNonNegative(inputs.len);
   const weight = clampNonNegative(inputs.weight);
@@ -129,21 +240,21 @@ export function calculateResult(
   // 1) Балка/двутавр — ТАБЛИЧНЫЙ РАСЧЕТ
   // ----------------------------
   if (assortment === "Балка/двутавр") {
-  const kgPerM = beamKgPerM(inputs.beamType, inputs.beamNumber);
-  if (!kgPerM) return 0;
+    const kgPerM = beamKgPerM(inputs.beamType, inputs.beamNumber);
+    if (!kgPerM) return 0;
 
-  if (mode === "weight") return kgPerM * len * qty;
-  return weight / (kgPerM * qty);
+    if (mode === "weight") return kgPerM * len * qty;
+    return weight / (kgPerM * qty);
 
-}
+  }
 
   // ----------------------------
   // 2) Лист/плита — ОБЪЕМНЫЙ РАСЧЕТ
   // ----------------------------
   if (assortment === "Лист/плита") {
-  // Вес листа = t * a * b * density * qty
-  // (всё в метрах, density в кг/м3)
-  return weightPlate(t, a, b, density, qty);
+    // Вес листа = t * a * b * density * qty
+    // (всё в метрах, density в кг/м3)
+    return weightPlate(t, a, b, density, qty);
   }
 
 
@@ -179,29 +290,29 @@ export function calculateResult(
   }
 
   // Уголок
-else if (assortment === "Уголок") {
-  if (isFinitePos(a) && isFinitePos(b) && isFinitePos(t)) {
-    area_m2 = t * (a + b - t);
-  }
-}
-
-else if (assortment === "Швеллер") {
-  const kgPerM = CHANNEL_KG_PER_M[inputs.channelNumber ?? ""];
-  if (!kgPerM) return 0;
-
-  if (mode === "weight") {
-    return kgPerM * len * qty;
+  else if (assortment === "Уголок") {
+    if (isFinitePos(a) && isFinitePos(b) && isFinitePos(t)) {
+      area_m2 = t * (a + b - t);
+    }
   }
 
-  return weight / (kgPerM * qty);
-}
+  else if (assortment === "Швеллер") {
+    const kgPerM = CHANNEL_KG_PER_M[inputs.channelNumber ?? ""];
+    if (!kgPerM) return 0;
 
-// Шестигранник: a — размер между гранями (мм в UI -> м в calc)
-else if (assortment === "Шестигранник") {
-  if (isFinitePos(a)) {
-    area_m2 = (Math.sqrt(3) / 2) * a * a;
+    if (mode === "weight") {
+      return kgPerM * len * qty;
+    }
+
+    return weight / (kgPerM * qty);
   }
-}
+
+  // Шестигранник: a — размер между гранями (мм в UI -> м в calc)
+  else if (assortment === "Шестигранник") {
+    if (isFinitePos(a)) {
+      area_m2 = (Math.sqrt(3) / 2) * a * a;
+    }
+  }
 
 
   // Если сортамент пока не реализован — 0
