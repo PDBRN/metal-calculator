@@ -48,40 +48,27 @@ export function OffersPanel({ metal, assortment }: OffersPanelProps) {
     if (!visible || offers.length === 0) return null;
 
     return (
-        <div className="mt-4 w-full">
+        <div className="w-full">
             {/* Tizer / Header */}
             <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="overflow-hidden rounded-2xl bg-white ring-1 ring-zinc-200/60 shadow-sm"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="overflow-hidden"
             >
                 <div
                     onClick={() => setExpanded(!expanded)}
                     className={cn(
-                        "flex w-full cursor-pointer items-center justify-between px-4 py-3 transition-colors hover:bg-zinc-50",
-                        expanded && "bg-zinc-50 border-b border-zinc-100"
+                        "flex w-full cursor-pointer items-center justify-between px-6 py-4 transition-colors hover:bg-zinc-50/50",
+                        expanded && "bg-zinc-50/50 border-b border-zinc-100"
                     )}
                 >
-                    <div className="flex items-center gap-3">
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs font-bold text-blue-700">
-                            %
-                        </span>
-                        <span className="text-sm font-semibold text-zinc-800">
-                            Где купить{" "}
-                            <span className="text-zinc-400 font-normal">({offers.length})</span>
+                    <div className="flex items-center gap-2 text-zinc-500">
+                        <span className="text-xs font-semibold uppercase tracking-wider">
+                            Поставщики этого металла: <span className="text-zinc-900">{offers.length}</span>
                         </span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                        {!expanded && (
-                            <button
-                                onClick={handleHide}
-                                className="text-[10px] font-medium text-zinc-400 hover:text-zinc-600 px-2 py-1 rounded bg-zinc-100 hover:bg-zinc-200 transition-colors mr-1"
-                                title="Скрыть на 7 дней"
-                            >
-                                Не показывать
-                            </button>
-                        )}
                         <Chevron rotated={expanded} />
                     </div>
                 </div>
@@ -90,22 +77,22 @@ export function OffersPanel({ metal, assortment }: OffersPanelProps) {
                 <AnimatePresence>
                     {expanded && (
                         <motion.div
-                            initial={{ height: 0 }}
-                            animate={{ height: "auto" }}
-                            exit={{ height: 0 }}
-                            className="overflow-hidden"
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: "auto", opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            className="overflow-hidden bg-white"
                         >
                             <div className="divide-y divide-zinc-100">
                                 {offers.map((offer, idx) => (
                                     <OfferItem key={idx} offer={offer} />
                                 ))}
                             </div>
-                            <div className="bg-zinc-50 px-4 py-2 text-center">
+                            <div className="bg-zinc-50/50 px-6 py-3 text-center border-t border-zinc-100">
                                 <button
                                     onClick={handleHide}
-                                    className="text-xs text-zinc-400 hover:text-red-500 hover:underline transition-colors"
+                                    className="text-[11px] font-medium text-zinc-400 hover:text-zinc-600 transition-colors uppercase tracking-tight"
                                 >
-                                    Скрыть предложения на {HIDE_DURATION_DAYS} дней
+                                    Скрыть блок предложений на {HIDE_DURATION_DAYS} дней
                                 </button>
                             </div>
                         </motion.div>
@@ -118,24 +105,24 @@ export function OffersPanel({ metal, assortment }: OffersPanelProps) {
 
 function OfferItem({ offer }: { offer: Offer }) {
     return (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-4 py-3 hover:bg-zinc-50/50 transition-colors">
-            <div className="flex items-center gap-3 w-full sm:w-auto overflow-hidden">
-                {/* Logo Placeholder */}
-                <div className="flex h-10 w-10 shrink-0 text-[8px] items-center justify-center rounded-lg border border-zinc-100 bg-white p-1">
-                    <img src={offer.logo} alt={offer.name} className="h-full w-full object-contain opacity-80" onError={(e) => (e.currentTarget.src = "/globe.svg")} />
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 py-4 hover:bg-zinc-50/30 transition-colors group">
+            <div className="flex items-center gap-4 w-full sm:w-auto overflow-hidden">
+                {/* Logo */}
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-zinc-100 bg-white p-2 shadow-sm">
+                    <img src={offer.logo} alt={offer.name} className="h-full w-full object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all" onError={(e) => (e.currentTarget.src = "/globe.svg")} />
                 </div>
                 <div className="min-w-0">
                     <div className="text-sm font-bold text-zinc-900 truncate">{offer.name}</div>
-                    <div className="text-xs text-zinc-500">
-                        от <span className="font-semibold text-zinc-900">{offer.priceFrom.toLocaleString("ru-RU")}</span> {offer.unit}
+                    <div className="text-xs text-zinc-500 mt-0.5">
+                        Цена от: <span className="font-bold text-zinc-800">{offer.priceFrom.toLocaleString("ru-RU")}</span> {offer.unit}
                     </div>
                 </div>
             </div>
 
-            <div className="flex w-full sm:w-auto items-center gap-2 justify-end">
+            <div className="flex w-full sm:w-auto items-center gap-3 justify-end mt-2 sm:mt-0">
                 <a
                     href={`tel:${offer.phone}`}
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-200 text-zinc-600 hover:border-zinc-300 hover:bg-zinc-100 transition-all"
+                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:bg-zinc-100 hover:text-zinc-900 transition-all"
                     title={offer.phone}
                 >
                     <PhoneIcon />
@@ -144,9 +131,9 @@ function OfferItem({ offer }: { offer: Offer }) {
                     href={offer.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 sm:flex-none flex items-center justify-center rounded-lg bg-blue-600 px-4 py-1.5 text-xs font-bold text-white shadow-sm shadow-blue-600/20 hover:bg-blue-700 transition-all active:scale-95"
+                    className="flex-1 sm:flex-none flex items-center justify-center rounded-xl bg-zinc-900 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-zinc-800 transition-all active:scale-[0.98]"
                 >
-                    Перейти
+                    Перейти в каталог
                 </a>
             </div>
         </div>

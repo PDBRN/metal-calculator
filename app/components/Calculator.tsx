@@ -779,11 +779,16 @@ export default function Calculator() {
               <div className="text-xs text-zinc-400 mt-2 h-4">
                 {assortment ? `${metal} • ${assortment}` : ""}
               </div>
-
-              {result > 0 && <OffersPanel metal={metal} assortment={assortment} />}
             </div>
           </div>
         </div>
+
+        {/* Блок предложений (на всю ширину) */}
+        {result > 0 && (
+          <div className="border-t border-zinc-100 bg-white">
+            <OffersPanel metal={metal} assortment={assortment} />
+          </div>
+        )}
       </motion.div>
     </div>
   );
