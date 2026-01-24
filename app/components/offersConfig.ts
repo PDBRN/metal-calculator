@@ -62,7 +62,7 @@ export const OFFERS_DATA: Partial<Record<METAL_KEY, Partial<Record<ASSORTMENT_KE
     black: {
         square: [
             {
-                name: "Металл-Сервис",
+                name: "ЦентрСтройГрупп",
                 logo: "/globe.svg",
                 priceFrom: 45000,
                 unit: "₽/т",
@@ -70,7 +70,7 @@ export const OFFERS_DATA: Partial<Record<METAL_KEY, Partial<Record<ASSORTMENT_KE
                 phone: "+7 (495) 000-00-01",
             },
             {
-                name: "Сталь-Пром",
+                name: "Промышленные Стали и Сплавы",
                 logo: "/file.svg",
                 priceFrom: 150,
                 unit: "₽/м",
@@ -78,7 +78,7 @@ export const OFFERS_DATA: Partial<Record<METAL_KEY, Partial<Record<ASSORTMENT_KE
                 phone: "+7 (800) 000-00-02",
             },
             {
-                name: "Металлобаза №1",
+                name: "Цветная металлургия",
                 logo: "/window.svg",
                 priceFrom: 44500,
                 unit: "₽/т",

@@ -64,7 +64,7 @@ export function OffersPanel({ metal, assortment }: OffersPanelProps) {
                 >
                     <div className="flex items-center gap-2 text-zinc-500">
                         <span className="text-xs font-semibold uppercase tracking-wider">
-                            Поставщики этого металла: <span className="text-zinc-900">{offers.length}</span>
+                            Где можно купить: <span className="text-zinc-900">{offers.length}</span>
                         </span>
                     </div>
 
@@ -105,21 +105,35 @@ export function OffersPanel({ metal, assortment }: OffersPanelProps) {
 
 function OfferItem({ offer }: { offer: Offer }) {
     return (
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-6 py-4 hover:bg-zinc-50/30 transition-colors group">
-            <div className="flex items-center gap-4 w-full sm:w-auto overflow-hidden">
-                {/* Logo */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 hover:bg-zinc-50/30 transition-colors group">
+            {/* Logo + Name */}
+            <div className="flex items-center gap-4 w-full sm:w-[240px] shrink-0 overflow-hidden">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-zinc-100 bg-white p-2 shadow-sm">
-                    <img src={offer.logo} alt={offer.name} className="h-full w-full object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all" onError={(e) => (e.currentTarget.src = "/globe.svg")} />
+                    <img
+                        src={offer.logo}
+                        alt={offer.name}
+                        className="h-full w-full object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all"
+                        onError={(e) => (e.currentTarget.src = "/globe.svg")}
+                    />
                 </div>
-                <div className="min-w-0">
-                    <div className="text-sm font-bold text-zinc-900 truncate">{offer.name}</div>
-                    <div className="text-xs text-zinc-500 mt-0.5">
-                        Цена от: <span className="font-bold text-zinc-800">{offer.priceFrom.toLocaleString("ru-RU")}</span> {offer.unit}
-                    </div>
+                <div className="text-sm font-bold text-zinc-900 truncate">
+                    {offer.name}
                 </div>
             </div>
 
-            <div className="flex w-full sm:w-auto items-center gap-3 justify-end mt-2 sm:mt-0">
+            {/* Price (Middle-Right) */}
+            <div className="flex-1 flex justify-end px-2">
+                <div className="text-right">
+                    <span className="text-xs text-zinc-400 tracking-tight mr-1">Цена от:</span>
+                    <span className="text-sm font-semibold text-zinc-700">
+                        {offer.priceFrom.toLocaleString("ru-RU")}
+                    </span>
+                    <span className="text-xs text-zinc-400 ml-1">{offer.unit}</span>
+                </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex w-full sm:w-auto items-center gap-3 justify-end shrink-0">
                 <a
                     href={`tel:${offer.phone}`}
                     className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:bg-zinc-100 hover:text-zinc-900 transition-all"
@@ -131,7 +145,7 @@ function OfferItem({ offer }: { offer: Offer }) {
                     href={offer.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 sm:flex-none flex items-center justify-center rounded-xl bg-zinc-900 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-zinc-800 transition-all active:scale-[0.98]"
+                    className="flex-1 sm:flex-none flex items-center justify-center rounded-xl bg-[#5a7f9e] px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#4a6b8a] transition-all active:scale-[0.98]"
                 >
                     Перейти в каталог
                 </a>
