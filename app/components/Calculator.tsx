@@ -25,6 +25,7 @@ import type { ElbowExecution, ElbowSize } from "./data";
 import { calculateResult, calcPlateArea } from "./calc";
 import type { CalcInputs } from "./calc";
 import AssortmentScheme from "./schemes";
+import { OffersPanel } from "./OffersPanel";
 
 type Mode = "weight" | "length";
 
@@ -778,6 +779,8 @@ export default function Calculator() {
               <div className="text-xs text-zinc-400 mt-2 h-4">
                 {assortment ? `${metal} • ${assortment}` : ""}
               </div>
+
+              {result > 0 && <OffersPanel metal={metal} assortment={assortment} />}
             </div>
           </div>
         </div>
