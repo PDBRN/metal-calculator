@@ -1,4 +1,4 @@
-import type { Metal } from "./data";
+// No unused imports here
 
 export interface Offer {
     name: string;
@@ -63,7 +63,7 @@ export const OFFERS_DATA: Partial<Record<METAL_KEY, Partial<Record<ASSORTMENT_KE
         square: [
             {
                 name: "ЦентрСтройГрупп",
-                logo: "/logos/csg.png", // Путь к будущему логотипу
+                logo: "/logos/csg.png", // Путь к логотипу
                 priceFrom: 45000,
                 unit: "₽/т",
                 link: "https://example.com/black/square",
