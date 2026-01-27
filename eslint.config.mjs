@@ -1,14 +1,19 @@
-import nextVitals from "eslint-config-next/core-web-vitals.js";
-import nextTs from "eslint-config-next/typescript.js";
+import { dirname } from "path";
+import { fileURLToPath } from "url";
+import { FlatCompat } from "@eslint/eslintrc";
 
-/** @type {import("eslint").Linter.Config[]} */
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const compat = new FlatCompat({
+  baseDirectory: __dirname,
+});
+
 const eslintConfig = [
+  ...compat.extends("next/core-web-vitals", "next/typescript"),
   {
-    ignores: [".next/**", "out/**", "build/**", "next-env.d.ts"],
+    ignores: [".next/**", "dist/**", "build/**"],
   },
-  // We use object assigned configs if they are not arrays
-  ...(Array.isArray(nextVitals) ? nextVitals : [nextVitals]),
-  ...(Array.isArray(nextTs) ? nextTs : [nextTs]),
 ];
 
 export default eslintConfig;
