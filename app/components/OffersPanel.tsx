@@ -10,40 +10,17 @@ interface OffersPanelProps {
     assortment: string;
 }
 
-const HIDE_DURATION_DAYS = 7;
-const STORAGE_KEY = "metal_calc_hide_offers_until";
-
 export function OffersPanel({ metal, assortment }: OffersPanelProps) {
     const [offers, setOffers] = useState<Offer[]>([]);
     const [visible, setVisible] = useState(false);
     const [expanded, setExpanded] = useState(false);
 
     useEffect(() => {
-        // 1. Check if hidden by user
-        const hiddenUntil = localStorage.getItem(STORAGE_KEY);
-        if (hiddenUntil) {
-            const date = new Date(parseInt(hiddenUntil, 10));
-            if (date > new Date()) {
-                setVisible(false);
-                return; // Still hidden
-            } else {
-                localStorage.removeItem(STORAGE_KEY); // Expired
-            }
-        }
-
-        // 2. Load offers
+        // Load offers
         const data = getOffers(metal, assortment);
         setOffers(data);
         setVisible(data.length > 0);
     }, [metal, assortment]);
-
-    const handleHide = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        const until = new Date();
-        until.setDate(until.getDate() + HIDE_DURATION_DAYS);
-        localStorage.setItem(STORAGE_KEY, until.getTime().toString());
-        setVisible(false);
-    };
 
     if (!visible || offers.length === 0) return null;
 
@@ -51,20 +28,48 @@ export function OffersPanel({ metal, assortment }: OffersPanelProps) {
         <div className="w-full">
             {/* Tizer / Header */}
             <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="overflow-hidden"
+                initial={{ opacity: 0, y: 15 }}
+                animate={{
+                    opacity: 1,
+                    y: 0,
+                }}
+                transition={{
+                    type: "spring",
+                    stiffness: 120,
+                    damping: 20,
+                    mass: 0.8,
+                }}
+                className="overflow-hidden relative group rounded-b-2xl border border-zinc-100 bg-white"
             >
+
                 <div
                     onClick={() => setExpanded(!expanded)}
                     className={cn(
-                        "flex w-full cursor-pointer items-center justify-between px-6 py-4 transition-colors hover:bg-zinc-50/50",
+                        "flex w-full cursor-pointer items-center justify-between px-6 py-5 transition-colors hover:bg-zinc-50/50 relative z-20",
                         expanded && "bg-zinc-50/50 border-b border-zinc-100"
                     )}
                 >
-                    <div className="flex items-center gap-2 text-zinc-500">
-                        <span className="text-xs font-semibold uppercase tracking-wider">
-                            Где можно купить: <span className="text-zinc-900">{offers.length}</span>
+                    <div className="flex items-center gap-2">
+                        <div className="relative flex h-5 w-5 items-center justify-center">
+                            <div className="h-2 w-2 rounded-full bg-blue-500 z-10" />
+                            <motion.div
+                                initial={{ scale: 1, opacity: 0 }}
+                                animate={{
+                                    scale: [1, 4],
+                                    opacity: [0, 0.5, 0]
+                                }}
+                                transition={{
+                                    repeat: Infinity,
+                                    duration: 4,
+                                    repeatDelay: 1,
+                                    ease: "easeOut",
+                                    times: [0, 0.2, 1]
+                                }}
+                                className="absolute h-2 w-2 rounded-full bg-blue-400"
+                            />
+                        </div>
+                        <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+                            Где можно купить: <span className="text-zinc-900 ml-1">{offers.length}</span>
                         </span>
                     </div>
 
@@ -74,26 +79,23 @@ export function OffersPanel({ metal, assortment }: OffersPanelProps) {
                 </div>
 
                 {/* Expanded Content */}
-                <AnimatePresence>
+                <AnimatePresence initial={false}>
                     {expanded && (
                         <motion.div
+                            key="content"
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
+                            transition={{
+                                height: { duration: 0.8, ease: [0.4, 0, 0.2, 1] },
+                                opacity: { duration: 0.4 }
+                            }}
                             className="overflow-hidden bg-white"
                         >
                             <div className="divide-y divide-zinc-100">
                                 {offers.map((offer, idx) => (
                                     <OfferItem key={idx} offer={offer} />
                                 ))}
-                            </div>
-                            <div className="bg-zinc-50/50 px-6 py-3 text-center border-t border-zinc-100">
-                                <button
-                                    onClick={handleHide}
-                                    className="text-[11px] font-medium text-zinc-400 hover:text-zinc-600 transition-colors uppercase tracking-tight"
-                                >
-                                    Скрыть блок предложений на {HIDE_DURATION_DAYS} дней
-                                </button>
                             </div>
                         </motion.div>
                     )}
@@ -107,7 +109,7 @@ function OfferItem({ offer }: { offer: Offer }) {
     return (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 hover:bg-zinc-50/30 transition-colors group">
             {/* Logo + Name */}
-            <div className="flex items-center gap-4 w-full sm:w-[240px] shrink-0 overflow-hidden">
+            <div className="flex items-center gap-4 w-full sm:w-auto overflow-hidden">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-zinc-100 bg-white p-2 shadow-sm">
                     <img
                         src={offer.logo}
@@ -116,7 +118,7 @@ function OfferItem({ offer }: { offer: Offer }) {
                         onError={(e) => (e.currentTarget.src = "/globe.svg")}
                     />
                 </div>
-                <div className="text-sm font-bold text-zinc-900 truncate">
+                <div className="text-sm font-bold text-zinc-900">
                     {offer.name}
                 </div>
             </div>

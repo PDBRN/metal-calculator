@@ -63,7 +63,7 @@ export const OFFERS_DATA: Partial<Record<METAL_KEY, Partial<Record<ASSORTMENT_KE
         square: [
             {
                 name: "ЦентрСтройГрупп",
-                logo: "/globe.svg",
+                logo: "/logos/csg.png", // Путь к будущему логотипу
                 priceFrom: 45000,
                 unit: "₽/т",
                 link: "https://example.com/black/square",
@@ -71,7 +71,7 @@ export const OFFERS_DATA: Partial<Record<METAL_KEY, Partial<Record<ASSORTMENT_KE
             },
             {
                 name: "Промышленные Стали и Сплавы",
-                logo: "/file.svg",
+                logo: "/logos/pss.png",
                 priceFrom: 150,
                 unit: "₽/м",
                 link: "https://example.com/black/square/promo",
@@ -79,35 +79,13 @@ export const OFFERS_DATA: Partial<Record<METAL_KEY, Partial<Record<ASSORTMENT_KE
             },
             {
                 name: "Цветная металлургия",
-                logo: "/window.svg",
+                logo: "/logos/color_met.png",
                 priceFrom: 44500,
                 unit: "₽/т",
                 link: "https://example.com/shop",
                 phone: "+7 (999) 000-00-03",
             },
         ],
-        beam: [
-            {
-                name: "Балка-Трейд",
-                logo: "/globe.svg",
-                priceFrom: 52000,
-                unit: "₽/т",
-                link: "https://example.com/beams",
-                phone: "+7 (495) 111-22-33",
-            }
-        ]
-    },
-    stainless: {
-        sheet: [
-            {
-                name: "Инокс-Маркет",
-                logo: "/vercel.svg",
-                priceFrom: 350,
-                unit: "₽/кг",
-                link: "https://example.com/stainless/sheet",
-                phone: "+7 (495) 555-55-55",
-            }
-        ]
     }
 };
 
@@ -115,7 +93,12 @@ export function getOffers(metal: string, assortment: string): Offer[] {
     const mKey = METAL_MAP[metal];
     const aKey = ASSORTMENT_MAP[assortment];
 
-    if (!mKey || !aKey) return [];
+    const specificOffers = mKey && aKey ? OFFERS_DATA[mKey]?.[aKey] : undefined;
 
-    return OFFERS_DATA[mKey]?.[aKey] || [];
+    if (specificOffers && specificOffers.length > 0) {
+        return specificOffers;
+    }
+
+    // Fallback to default offers (e.g., from black square) to show everywhere
+    return OFFERS_DATA.black?.square || [];
 }
