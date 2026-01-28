@@ -1,4 +1,5 @@
 import React from "react";
+import { BEAM_DIMS } from "./data/beamDims";
 
 // Общие настройки стилей схемы
 const size = 260;
@@ -11,11 +12,11 @@ const Defs = () => (
     <pattern
       id="hatch"
       patternUnits="userSpaceOnUse"
-      width="6"
-      height="6"
+      width="10"
+      height="10"
       patternTransform="rotate(45)"
     >
-      <line x1="0" y1="0" x2="0" y2="6" stroke="#d4d4d8" strokeWidth="1" />
+      <line x1="0" y1="0" x2="0" y2="10" stroke="#d1d5db" strokeWidth="0.6" />
     </pattern>
 
     <marker id="arrow" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto">
@@ -24,6 +25,15 @@ const Defs = () => (
 
     <marker id="arrow-rev" markerWidth="6" markerHeight="6" refX="0" refY="3" orient="auto">
       <path d="M6,0 L0,3 L6,6 Z" fill={dimColor} />
+    </marker>
+
+    {/* Чёрные стрелки для швеллера */}
+    <marker id="arrow-black" markerWidth="6" markerHeight="6" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill={strokeColor} />
+    </marker>
+
+    <marker id="arrow-black-rev" markerWidth="6" markerHeight="6" refX="0" refY="3" orient="auto">
+      <path d="M6,0 L0,3 L6,6 Z" fill={strokeColor} />
     </marker>
 
     <style>{`.dash { stroke-dasharray: 4, 2; stroke: #a1a1aa; }`}</style>
@@ -104,6 +114,69 @@ const Dim = ({ x1, y1, x2, y2, label, offset = 25, vertical = false }: DimProps)
   );
 };
 
+// Упрощённый компонент размерной линии для швеллера (без белой подложки, чёрные стрелки)
+type ChannelDimProps = {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  label: string;
+  offset?: number;
+  vertical?: boolean;
+};
+
+const ChannelDim = ({ x1, y1, x2, y2, label, offset = 25, vertical = false }: ChannelDimProps) => {
+  const offX = vertical ? offset : 0;
+  const offY = vertical ? 0 : offset;
+
+  return (
+    <g>
+      {/* выносные линии */}
+      <line
+        x1={x1}
+        y1={y1}
+        x2={x1 + offX}
+        y2={y1 + offY}
+        stroke={strokeColor}
+        strokeWidth="1"
+      />
+      <line
+        x1={x2}
+        y1={y2}
+        x2={x2 + offX}
+        y2={y2 + offY}
+        stroke={strokeColor}
+        strokeWidth="1"
+      />
+
+      {/* размерная линия */}
+      <line
+        x1={x1 + offX}
+        y1={y1 + offY}
+        x2={x2 + offX}
+        y2={y2 + offY}
+        stroke={strokeColor}
+        strokeWidth="1.5"
+        markerStart="url(#arrow-black-rev)"
+        markerEnd="url(#arrow-black)"
+      />
+
+      {/* текст без подложки */}
+      <text
+        x={(x1 + x2) / 2 + offX}
+        y={(y1 + y2) / 2 + offY + (vertical ? 5 : -8)}
+        textAnchor="middle"
+        fill={strokeColor}
+        fontSize="12"
+        fontWeight="700"
+      >
+        {label}
+      </text>
+    </g>
+  );
+};
+
+
 type DimDiameterProps = {
   x1: number; // левая точка касания тела
   x2: number; // правая точка касания тела
@@ -163,9 +236,10 @@ type SchemeProps = {
   a: string;
   b: string; // для "Ленты" используем как L (если надо — прокинь len сюда из Calculator.tsx)
   t: string;
+  beamType?: string;
 };
 
-export default function AssortmentScheme({ assortment, d, a, b, t }: SchemeProps) {
+export default function AssortmentScheme({ assortment, d, a, b, t, beamType }: SchemeProps) {
   if (!assortment) return <span className="text-4xl text-zinc-200">?</span>;
 
   // ---- АРМАТУРА ----
@@ -251,6 +325,9 @@ export default function AssortmentScheme({ assortment, d, a, b, t }: SchemeProps
 
   // ---- БАЛКА/ДВУТАВР ----
   if (assortment === "Балка/двутавр") {
+    // d в данном случае — это номер балки
+    const dims = beamType && d && BEAM_DIMS[beamType]?.[d];
+
     const w = 90;
     const h = 120;
     const th = 15;
@@ -262,14 +339,50 @@ export default function AssortmentScheme({ assortment, d, a, b, t }: SchemeProps
       } L ${x},${y + h} L ${x},${y + h - th} L ${center - th / 2},${y + h - th} L ${center - th / 2
       },${y + th} L ${x},${y + th} Z`;
 
+    const labelH = dims ? dims.h.toString() : (a || "H ?");
+    const labelB = dims ? dims.b.toString() : (b || "B ?");
+    const labelS = dims ? dims.s.toString() : "";
+    const labelT = dims ? dims.t.toString() : (t || "");
+
     return (
       <Wrapper>
         <path d={path} fill="url(#hatch)" stroke={strokeColor} strokeWidth="2" />
-        <Dim x1={x} y1={y + h} x2={x + w} y2={y + h} label={`B ${b || "?"}`} offset={20} />
-        <Dim x1={x} y1={y} x2={x} y2={y + h} label={`H ${a || "?"}`} offset={-20} vertical />
-        <text x={x + w + 10} y={y + th + 5} fill={dimColor} fontSize="11" fontWeight="700">
-          t {t}
-        </text>
+        <Dim x1={x} y1={y + h} x2={x + w} y2={y + h} label={labelB} offset={20} />
+        <Dim x1={x} y1={y} x2={x} y2={y + h} label={labelH} offset={-20} vertical />
+
+        {/* Толщина стенки s */}
+        {labelS && (
+          <g>
+            {/* Вертикальные выносные линии для стенки s */}
+            <line x1={center - th / 2} y1={center - 10} x2={center - th / 2} y2={center + 10} stroke={dimColor} strokeWidth="0.5" opacity="0.5" />
+            <line x1={center + th / 2} y1={center - 10} x2={center + th / 2} y2={center + 10} stroke={dimColor} strokeWidth="0.5" opacity="0.5" />
+
+            {/* Левая стрелка за пределами стенки (смотрит вправо) */}
+            <line x1={center - th / 2 - 15} y1={center} x2={center - th / 2} y2={center} stroke={dimColor} strokeWidth="1" markerEnd="url(#arrow)" />
+            {/* Правая стрелка за пределами стенки (смотрит влево) */}
+            <line x1={center + th / 2 + 15} y1={center} x2={center + th / 2} y2={center} stroke={dimColor} strokeWidth="1" markerEnd="url(#arrow)" />
+            {/* Горизонтальная полка для числа s */}
+            <line x1={center + th / 2 + 5} y1={center} x2={center + th / 2 + 30} y2={center} stroke={dimColor} strokeWidth="0.5" />
+            <text x={center + th / 2 + 18} y={center - 3} fill={dimColor} fontSize="11" fontWeight="800" textAnchor="middle">
+              {labelS}
+            </text>
+          </g>
+        )}
+
+        {/* Толщина полки t */}
+        <g>
+          {/* Горизонтальные выносные линии от полки */}
+          <line x1={x + w} y1={y} x2={x + w + 20} y2={y} stroke={dimColor} strokeWidth="0.5" opacity="0.5" />
+          <line x1={x + w} y1={y + th} x2={x + w + 20} y2={y + th} stroke={dimColor} strokeWidth="0.5" opacity="0.5" />
+
+          {/* Вертикальные стрелки, указывающие на края полки */}
+          <line x1={x + w + 10} y1={y - 12} x2={x + w + 10} y2={y} stroke={dimColor} strokeWidth="1" markerEnd="url(#arrow)" />
+          <line x1={x + w + 10} y1={y + th + 12} x2={x + w + 10} y2={y + th} stroke={dimColor} strokeWidth="1" markerEnd="url(#arrow)" />
+
+          <text x={x + w + 18} y={y + th / 2 + 4} fill={dimColor} fontSize="11" fontWeight="800">
+            {labelT}
+          </text>
+        </g>
       </Wrapper>
     );
   }
@@ -442,104 +555,114 @@ export default function AssortmentScheme({ assortment, d, a, b, t }: SchemeProps
     );
   }
 
+  const CHANNEL_DIMS: Record<string, { h: number; b: number; s: number; t: number }> = {
+    "5П": { h: 50, b: 32, s: 4.4, t: 7.0 }, "5У": { h: 50, b: 32, s: 4.4, t: 7.0 },
+    "6.5П": { h: 65, b: 36, s: 4.4, t: 7.2 }, "6.5У": { h: 65, b: 36, s: 4.4, t: 7.2 },
+    "8П": { h: 80, b: 40, s: 4.5, t: 7.4 }, "8У": { h: 80, b: 40, s: 4.5, t: 7.4 },
+    "10П": { h: 100, b: 46, s: 4.5, t: 7.6 }, "10У": { h: 100, b: 46, s: 4.5, t: 7.6 },
+    "12П": { h: 120, b: 52, s: 4.8, t: 7.8 }, "12У": { h: 120, b: 52, s: 4.8, t: 7.8 },
+    "14П": { h: 140, b: 58, s: 4.9, t: 8.1 }, "14У": { h: 140, b: 58, s: 4.9, t: 8.1 },
+    "16П": { h: 160, b: 64, s: 5.0, t: 8.4 }, "16У": { h: 160, b: 64, s: 5.0, t: 8.4 },
+    "18П": { h: 180, b: 70, s: 5.1, t: 8.7 }, "18У": { h: 180, b: 70, s: 5.1, t: 8.7 },
+    "20П": { h: 200, b: 76, s: 5.2, t: 9.0 }, "20У": { h: 200, b: 76, s: 5.2, t: 9.0 },
+    "22П": { h: 220, b: 82, s: 5.4, t: 9.5 }, "22У": { h: 220, b: 82, s: 5.4, t: 9.5 },
+    "24П": { h: 240, b: 90, s: 5.6, t: 10.0 }, "24У": { h: 240, b: 90, s: 5.6, t: 10.0 },
+    "27П": { h: 270, b: 95, s: 6.0, t: 10.5 }, "27У": { h: 270, b: 95, s: 6.0, t: 10.5 },
+    "30П": { h: 300, b: 100, s: 6.5, t: 11.5 }, "30У": { h: 300, b: 100, s: 6.5, t: 11.5 },
+    "33П": { h: 330, b: 105, s: 7.0, t: 11.7 }, "33У": { h: 330, b: 105, s: 7.0, t: 11.7 },
+    "36П": { h: 360, b: 110, s: 7.5, t: 12.6 }, "36У": { h: 360, b: 110, s: 7.5, t: 12.6 },
+    "40П": { h: 400, b: 115, s: 8.0, t: 13.5 }, "40У": { h: 400, b: 115, s: 8.0, t: 13.5 },
+  };
 
   if (assortment === "Швеллер") {
-    const num = (d || "").toUpperCase();      // сюда мы прокидываем channelNumber
+    const num = (d || "").toUpperCase();
     const isU = num.includes("У");
-    const label = num || "Швеллер";
+    const dims = CHANNEL_DIMS[num] || { h: 0, b: 0, s: 0, t: 0 };
 
-    // размеры в пикселях
-    const H = 150;   // высота
-    const B = 95;    // ширина полок
-    const s = 18;    // стенка
-    const tFl = 22;  // полки
+    const H = 160;
+    const B = 80;
+    const tPx = 18;
+    const tip_t = isU ? 10 : 18;
+    const r = 22;
+
     const x0 = center - B / 2;
     const y0 = center - H / 2;
     const x1 = x0 + B;
     const y1 = y0 + H;
 
-    // внешний контур "П"
-    const outer =
-      `M ${x0},${y0} ` +
-      `H ${x1} ` +
-      `V ${y0 + tFl} ` +
-      `H ${x0 + s} ` +
-      `V ${y1 - tFl} ` +
-      `H ${x1} ` +
-      `V ${y1} ` +
-      `H ${x0} ` +
-      `Z`;
+    const webInnerX = x0 + tPx;
+    const innerTopY = y0 + tPx;
+    const innerBotY = y1 - tPx;
 
-    // внутренний контур (дырка) — одинаковый для П и У, только у "У" сделаем наклон линиями
-    const innerX = x0 + s;
-    const innerTopY = y0 + tFl;
-    const innerBotY = y1 - tFl;
-    const innerRightX = x1 - 10;
-
-    const inner =
-      `M ${innerX},${innerTopY} ` +
-      `H ${innerRightX} ` +
-      `V ${innerBotY} ` +
-      `H ${innerX} ` +
-      `Z`;
+    const path = `
+      M ${x0},${y0}
+      H ${x1}
+      V ${y0 + tip_t}
+      L ${webInnerX + r},${innerTopY}
+      Q ${webInnerX},${innerTopY} ${webInnerX},${innerTopY + r}
+      V ${innerBotY - r}
+      Q ${webInnerX},${innerBotY} ${webInnerX + r},${innerBotY}
+      L ${x1},${y1 - tip_t}
+      V ${y1}
+      H ${x0}
+      Z
+    `;
 
     return (
       <Wrapper>
-        {/* тело */}
         <path
-          d={`${outer} ${inner}`}
+          d={path}
           fill="url(#hatch)"
           stroke={strokeColor}
-          strokeWidth="2"
-          fillRule="evenodd"
+          strokeWidth="1.2"
+          strokeLinecap="square"
+          strokeLinejoin="miter"
         />
-
-        {/* размер по высоте */}
+        {/* РАЗМЕРЫ (Стиль CAD) */}
+        {/* Высота H (мм) */}
         <Dim
           x1={x0}
           y1={y0}
           x2={x0}
           y2={y1}
-          label={label}
+          label={(dims.h || num).toString()}
           offset={-25}
           vertical
         />
 
-        {/* уклон полок (для У) — просто две диагональные подсказки внутри, без ломания геометрии */}
-        {isU && (
-          <>
-            <line
-              x1={innerX + 6}
-              y1={innerTopY + 6}
-              x2={innerX + 26}
-              y2={innerTopY + 2}
-              stroke={strokeColor}
-              strokeWidth="2"
-              opacity="0.8"
-            />
-            <line
-              x1={innerX + 6}
-              y1={innerBotY - 6}
-              x2={innerX + 26}
-              y2={innerBotY - 2}
-              stroke={strokeColor}
-              strokeWidth="2"
-              opacity="0.8"
-            />
-          </>
-        )}
+        {/* Ширина полки B (мм) */}
+        <Dim
+          x1={x0}
+          y1={y1}
+          x2={x1}
+          y2={y1}
+          label={(b || dims.b || "?").toString()}
+          offset={40}
+        />
 
-        {/* подпись типа снизу */}
-        <text
-          x={center}
-          y={y1 + 28}
-          textAnchor="middle"
-          fill={dimColor}
-          fontSize="12"
-          fontWeight="800"
-        >
-          {isU ? "У (уклон полок)" : "П (параллельные полки)"}
-        </text>
+        {/* Толщина стенки s (Полочка с числом сверху) */}
+        <g>
+          <line x1={x0 - 15} y1={center} x2={x0} y2={center} stroke={dimColor} strokeWidth="1" markerEnd="url(#arrow)" />
+          <line x1={webInnerX} y1={center} x2={webInnerX + 25} y2={center} stroke={dimColor} strokeWidth="1" markerStart="url(#arrow)" />
+          <text x={webInnerX + 12.5} y={center - 4} fill={dimColor} fontSize="11" fontWeight="700" textAnchor="middle">
+            {dims.s}
+          </text>
+        </g>
+
+        {/* Толщина полки t (Г-образная выноска с числом сверху) */}
+        <g>
+          <line x1={center} y1={y1 + 15} x2={center} y2={y1} stroke={dimColor} strokeWidth="1" markerEnd="url(#arrow)" />
+          <path
+            d={`M ${center},${innerBotY} V ${innerBotY - 15} H ${center + 25}`}
+            fill="none"
+            stroke={dimColor}
+            strokeWidth="1"
+          />
+          <line x1={center} y1={innerBotY - 5} x2={center} y2={innerBotY} stroke={dimColor} strokeWidth="1" markerEnd="url(#arrow)" />
+          <text x={center + 12.5} y={innerBotY - 19} fill={dimColor} fontSize="11" fontWeight="700" textAnchor="middle">
+            {isU ? "~" : ""}{dims.t}
+          </text>
+        </g>
       </Wrapper>
     );
   }

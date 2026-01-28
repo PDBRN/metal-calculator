@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CHANNEL_KG_PER_M } from "./data";
 
@@ -26,14 +26,18 @@ import { calculateResult, calcPlateArea } from "./calc";
 import type { CalcInputs } from "./calc";
 import AssortmentScheme from "./schemes";
 import { OffersPanel } from "./OffersPanel";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type Mode = "weight" | "length";
 
-export default function Calculator() {
+function CalculatorContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   // --- Верхний уровень ---
-  const [metal, setMetal] = useState<Metal>("Чёрный");
-  const [assortment, setAssortment] = useState("");
-  const [mode, setMode] = useState<Mode>("weight");
+  const [metal, setMetal] = useState<Metal>((searchParams.get("metal") as Metal) || "Чёрный");
+  const [assortment, setAssortment] = useState(searchParams.get("assortment") || "");
+  const [mode, setMode] = useState<Mode>((searchParams.get("mode") as Mode) || "weight");
 
   // --- Общие поля ---
   // Используем как "Марка стали" (пока влияет только на UI, не на расчёт)
@@ -142,6 +146,23 @@ export default function Calculator() {
     setBeamNumber(first);
   }, [beamType, beamNumbersOptions, assortment]);
 
+  // Обновление URL при изменении параметров
+  useEffect(() => {
+    const currentParams = new URLSearchParams(searchParams.toString());
+    const newParams = new URLSearchParams(searchParams.toString());
+
+    if (metal) newParams.set("metal", metal);
+    if (assortment) newParams.set("assortment", assortment);
+    if (mode) newParams.set("mode", mode);
+
+    // Только если что-то реально изменилось
+    if (newParams.toString() !== currentParams.toString()) {
+      const queryString = newParams.toString();
+      const url = queryString ? `?${queryString}` : "";
+      router.replace(url, { scroll: false });
+    }
+  }, [metal, assortment, mode, router, searchParams]);
+
   // --- Расчет ---
   const handleCalculate = () => {
     if (!assortment) return;
@@ -212,10 +233,6 @@ export default function Calculator() {
     markLabel = "Марка титана";
     showMark = true;
   }
-  // Для цветных металлов (Алюминий, Медь и т.д.) пока скрываем марку 
-  // или можно будет добавить в будущем
-
-
 
   const renderAssortmentFields = () => {
     if (!assortment) {
@@ -270,7 +287,7 @@ export default function Calculator() {
                 />
               )}
 
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -300,7 +317,7 @@ export default function Calculator() {
                 />
               )}
 
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -335,7 +352,7 @@ export default function Calculator() {
                   suffix="кг"
                 />
               )}
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -368,7 +385,7 @@ export default function Calculator() {
                   suffix="кг"
                 />
               )}
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -402,7 +419,7 @@ export default function Calculator() {
                   suffix="кг"
                 />
               )}
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -427,7 +444,7 @@ export default function Calculator() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <InputField label="Длина b" value={b} onChange={setB} suffix="мм" />
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -466,7 +483,7 @@ export default function Calculator() {
                   suffix="кг"
                 />
               )}
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -501,7 +518,7 @@ export default function Calculator() {
                   suffix="кг"
                 />
               )}
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -532,7 +549,7 @@ export default function Calculator() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <InputField label="Длина L" value={len} onChange={setLen} suffix="м" />
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -557,7 +574,7 @@ export default function Calculator() {
                 options={[...ELBOW_SIZES]}
               />
 
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -583,7 +600,7 @@ export default function Calculator() {
                   suffix="кг"
                 />
               )}
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -616,7 +633,7 @@ export default function Calculator() {
                   suffix="кг"
                 />
               )}
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -650,7 +667,7 @@ export default function Calculator() {
                   suffix="кг"
                 />
               )}
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           )}
       </motion.div>
@@ -749,10 +766,16 @@ export default function Calculator() {
               <div className="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] flex items-center justify-center">
                 <AssortmentScheme
                   assortment={assortment}
-                  d={assortment === "Швеллер" ? channelNumber : (assortment === "Отвод" ? elbowSize : d)}
+                  d={
+                    assortment === "Швеллер" ? channelNumber :
+                      assortment === "Отвод" ? elbowSize :
+                        assortment === "Балка/двутавр" ? beamNumber :
+                          d
+                  }
                   a={a}
                   b={assortment === "Лента" ? len : b}
                   t={t}
+                  beamType={assortment === "Балка/двутавр" ? beamType : undefined}
                 />
               </div>
             </div>
@@ -791,5 +814,17 @@ export default function Calculator() {
         )}
       </motion.div>
     </div>
+  );
+}
+
+export default function Calculator() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-[#F3F4F6] text-zinc-500">
+        Загрузка калькулятора...
+      </div>
+    }>
+      <CalculatorContent />
+    </Suspense>
   );
 }
