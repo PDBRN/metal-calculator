@@ -1,11 +1,13 @@
 import { Suspense } from "react";
 import { Calculator } from "./components/Calculator";
+import { DebugStatus } from "./components/DebugStatus";
 
 console.log("[BUNDLE] page.tsx LOADED");
 
 export default function Home() {
   return (
     <main>
+      <DebugStatus />
       <Suspense fallback={
         <div className="min-h-screen flex items-center justify-center bg-white text-zinc-500 font-sans p-4 text-center">
           <div className="space-y-4">
