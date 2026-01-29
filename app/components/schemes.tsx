@@ -114,67 +114,7 @@ const Dim = ({ x1, y1, x2, y2, label, offset = 25, vertical = false }: DimProps)
   );
 };
 
-// Упрощённый компонент размерной линии для швеллера (без белой подложки, чёрные стрелки)
-type ChannelDimProps = {
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  label: string;
-  offset?: number;
-  vertical?: boolean;
-};
 
-const ChannelDim = ({ x1, y1, x2, y2, label, offset = 25, vertical = false }: ChannelDimProps) => {
-  const offX = vertical ? offset : 0;
-  const offY = vertical ? 0 : offset;
-
-  return (
-    <g>
-      {/* выносные линии */}
-      <line
-        x1={x1}
-        y1={y1}
-        x2={x1 + offX}
-        y2={y1 + offY}
-        stroke={strokeColor}
-        strokeWidth="1"
-      />
-      <line
-        x1={x2}
-        y1={y2}
-        x2={x2 + offX}
-        y2={y2 + offY}
-        stroke={strokeColor}
-        strokeWidth="1"
-      />
-
-      {/* размерная линия */}
-      <line
-        x1={x1 + offX}
-        y1={y1 + offY}
-        x2={x2 + offX}
-        y2={y2 + offY}
-        stroke={strokeColor}
-        strokeWidth="1.5"
-        markerStart="url(#arrow-black-rev)"
-        markerEnd="url(#arrow-black)"
-      />
-
-      {/* текст без подложки */}
-      <text
-        x={(x1 + x2) / 2 + offX}
-        y={(y1 + y2) / 2 + offY + (vertical ? 5 : -8)}
-        textAnchor="middle"
-        fill={strokeColor}
-        fontSize="12"
-        fontWeight="700"
-      >
-        {label}
-      </text>
-    </g>
-  );
-};
 
 
 type DimDiameterProps = {

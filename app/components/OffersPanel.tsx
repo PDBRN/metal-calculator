@@ -5,6 +5,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { getOffers, Offer } from "./offersConfig";
 import { cn } from "./ui";
 
+import Image from "next/image";
+
 interface OffersPanelProps {
     metal: string;
     assortment: string;
@@ -111,10 +113,13 @@ function OfferItem({ offer }: { offer: Offer }) {
             {/* Logo + Name */}
             <div className="flex items-center gap-4 w-full sm:w-auto overflow-hidden">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-zinc-100 bg-white p-2 shadow-sm">
-                    <img
+                    <Image
                         src={offer.logo}
                         alt={offer.name}
+                        width={48}
+                        height={48}
                         className="h-full w-full object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all"
+                        unoptimized
                         onError={(e) => (e.currentTarget.src = "/globe.svg")}
                     />
                 </div>
