@@ -31,6 +31,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 type Mode = "weight" | "length";
 
 function CalculatorContent() {
+  console.log("[CALC] Render CalculatorContent");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -38,16 +39,28 @@ function CalculatorContent() {
   const [metal, setMetal] = useState<Metal>("Чёрный");
   const [assortment, setAssortment] = useState("");
   const [mode, setMode] = useState<Mode>("weight");
+  const [isMounted, setIsMounted] = useState(false);
 
   // Синхронизация с URL при первом входе
   useEffect(() => {
+    console.log("[CALC] Client Mount - Syncing Params");
+    setIsMounted(true);
     const metalParam = searchParams.get("metal") as Metal;
     const assortmentParam = searchParams.get("assortment");
     const modeParam = searchParams.get("mode") as Mode;
 
-    if (isMetal(metalParam)) setMetal(metalParam);
-    if (assortmentParam) setAssortment(assortmentParam);
-    if (modeParam === "weight" || modeParam === "length") setMode(modeParam);
+    if (isMetal(metalParam)) {
+      console.log("[CALC] Set metal from param:", metalParam);
+      setMetal(metalParam);
+    }
+    if (assortmentParam) {
+      console.log("[CALC] Set assortment from param:", assortmentParam);
+      setAssortment(assortmentParam);
+    }
+    if (modeParam === "weight" || modeParam === "length") {
+      console.log("[CALC] Set mode from param:", modeParam);
+      setMode(modeParam);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -686,6 +699,15 @@ function CalculatorContent() {
     );
   };
 
+  if (!isMounted) {
+    console.log("[CALC] Waiting for mount...");
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#F3F4F6] text-zinc-500">
+        Инициализация калькулятора...
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F3F4F6] p-4 text-zinc-900 font-sans">
       <motion.div
@@ -831,11 +853,7 @@ function CalculatorContent() {
 
 export default function Calculator() {
   return (
-    <Suspense fallback={
-      <div className="min-h-screen flex items-center justify-center bg-[#F3F4F6] text-zinc-500">
-        Загрузка калькулятора...
-      </div>
-    }>
+    <Suspense fallback={null}>
       <CalculatorContent />
     </Suspense>
   );
