@@ -28,10 +28,12 @@ import AssortmentScheme from "./schemes";
 import { OffersPanel } from "./OffersPanel";
 import { useRouter, useSearchParams } from "next/navigation";
 
+console.log("[BUNDLE] Calculator.tsx LOADED");
+
 type Mode = "weight" | "length";
 
-function CalculatorContent() {
-  console.log("[CALC] Render CalculatorContent");
+export function Calculator() {
+  console.log("[CALC] Render Calculator");
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -851,10 +853,4 @@ function CalculatorContent() {
   );
 }
 
-export default function Calculator() {
-  return (
-    <Suspense fallback={null}>
-      <CalculatorContent />
-    </Suspense>
-  );
-}
+// Удалено внутреннее обертывание в Suspense, оно перенесено в page.tsx
