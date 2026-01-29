@@ -35,9 +35,21 @@ function CalculatorContent() {
   const searchParams = useSearchParams();
 
   // --- Верхний уровень ---
-  const [metal, setMetal] = useState<Metal>((searchParams.get("metal") as Metal) || "Чёрный");
-  const [assortment, setAssortment] = useState(searchParams.get("assortment") || "");
-  const [mode, setMode] = useState<Mode>((searchParams.get("mode") as Mode) || "weight");
+  const [metal, setMetal] = useState<Metal>("Чёрный");
+  const [assortment, setAssortment] = useState("");
+  const [mode, setMode] = useState<Mode>("weight");
+
+  // Синхронизация с URL при первом входе
+  useEffect(() => {
+    const metalParam = searchParams.get("metal") as Metal;
+    const assortmentParam = searchParams.get("assortment");
+    const modeParam = searchParams.get("mode") as Mode;
+
+    if (isMetal(metalParam)) setMetal(metalParam);
+    if (assortmentParam) setAssortment(assortmentParam);
+    if (modeParam === "weight" || modeParam === "length") setMode(modeParam);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // --- Общие поля ---
   // Используем как "Марка стали" (пока влияет только на UI, не на расчёт)
