@@ -67,7 +67,7 @@ export const OFFERS_DATA: Partial<Record<METAL_KEY, Partial<Record<ASSORTMENT_KE
                 priceFrom: 45000,
                 unit: "₽/т",
                 link: "https://example.com/black/square",
-                phone: "+7 (495) 000-00-01",
+                phone: "+7 (958) 497-09-00",
             },
             {
                 name: "Промышленные Стали и Сплавы",
@@ -75,15 +75,15 @@ export const OFFERS_DATA: Partial<Record<METAL_KEY, Partial<Record<ASSORTMENT_KE
                 priceFrom: 150,
                 unit: "₽/м",
                 link: "https://example.com/black/square/promo",
-                phone: "+7 (800) 000-00-02",
+                phone: "+7 (958) 400-89-47",
             },
             {
-                name: "Цветная металлургия",
+                name: "Металл стор",
                 logo: "/logos/color_met.png",
                 priceFrom: 44500,
                 unit: "₽/т",
                 link: "https://example.com/shop",
-                phone: "+7 (999) 000-00-03",
+                phone: "+7 (958) 758-38-15",
             },
         ],
     }
