@@ -18,10 +18,13 @@ export function OffersPanel({ metal, assortment }: OffersPanelProps) {
     const [expanded, setExpanded] = useState(false);
 
     useEffect(() => {
-        // Load offers
-        const data = getOffers(metal, assortment);
-        setOffers(data);
-        setVisible(data.length > 0);
+        // Load offers asynchronously
+        const loadOffers = async () => {
+            const data = await getOffers(metal, assortment);
+            setOffers(data);
+            setVisible(data.length > 0);
+        };
+        loadOffers();
     }, [metal, assortment]);
 
     if (!visible || offers.length === 0) return null;
@@ -129,15 +132,17 @@ function OfferItem({ offer }: { offer: Offer }) {
             </div>
 
             {/* Price (Middle-Right) */}
-            {/* <div className="flex-1 flex justify-end px-2">
+            <div className="flex-1 flex justify-end px-2">
                 <div className="text-right">
                     <span className="text-xs text-zinc-400 tracking-tight mr-1">Цена от:</span>
                     <span className="text-sm font-semibold text-zinc-700">
-                        {offer.priceFrom.toLocaleString("ru-RU")}
+                        {typeof offer.priceFrom === 'number'
+                            ? offer.priceFrom.toLocaleString("ru-RU")
+                            : offer.priceFrom}
                     </span>
                     <span className="text-xs text-zinc-400 ml-1">{offer.unit}</span>
                 </div>
-            </div> */}
+            </div>
 
             {/* Actions */}
             <div className="flex w-full sm:w-auto items-center gap-3 justify-end shrink-0">
