@@ -81,16 +81,15 @@ export const DEFAULT_COMPANIES = {
 };
 
 // Google Sheet Configuration
-// Replace with the actual spreadsheet ID after publishing
-const SPREADSHEET_ID = '1-I26u-2Y_9I5BwG_E_G3Z0-O9CjS-v4_P4m6S_V4_8'; // Placeholder
+const SPREADSHEET_ID = '2PACX-1vTkDzIEOteeSHLkGbbs97F6-fy6EmYM_9nIRT0ziYcH2PFO-Wv9RMBJrzocHIhMc6kTng_cPAip_-w2';
 const SHEET_GIDS: Record<METAL_KEY, string> = {
-    black: '0',
-    stainless: '12345',
-    aluminum: '67890',
-    copper: '11111',
-    brass: '22222',
-    bronze: '33333',
-    titan: '44444',
+    black: '752936810',
+    stainless: '1878277559',
+    aluminum: '146179481',
+    copper: '1466558955',
+    brass: '1190387165',
+    bronze: '2131464635',
+    titan: '323390538',
 };
 
 // Cache for fetched data
@@ -110,7 +109,8 @@ export async function getOffers(metal: string, assortment: string): Promise<Offe
         if (SPREADSHEET_ID.includes('PLACEHOLDER')) return getDefaultOffers();
 
         const gid = SHEET_GIDS[mKey];
-        const url = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv&gid=${gid}`;
+        // Use the published CSV link format
+        const url = `https://docs.google.com/spreadsheets/d/e/${SPREADSHEET_ID}/pub?output=csv&gid=${gid}`;
 
         const response = await fetch(url);
         if (!response.ok) throw new Error('Fetch failed');
