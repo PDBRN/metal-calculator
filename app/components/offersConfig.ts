@@ -109,10 +109,16 @@ export async function getOffers(metal: string, assortment: string): Promise<Offe
         if (SPREADSHEET_ID.includes('PLACEHOLDER')) return getDefaultOffers();
 
         const gid = SHEET_GIDS[mKey];
-        // Use the published CSV link format
-        const url = `https://docs.google.com/spreadsheets/d/e/${SPREADSHEET_ID}/pub?output=csv&gid=${gid}`;
+        // Use the published CSV link format with a timestamp to bypass browser cache
+        const url = `https://docs.google.com/spreadsheets/d/e/${SPREADSHEET_ID}/pub?output=csv&gid=${gid}&t=${Date.now()}`;
 
-        const response = await fetch(url);
+        const response = await fetch(url, {
+            cache: 'no-store',
+            headers: {
+                'Pragma': 'no-cache',
+                'Cache-Control': 'no-cache'
+            }
+        });
         if (!response.ok) throw new Error('Fetch failed');
 
         const csvText = await response.text();
