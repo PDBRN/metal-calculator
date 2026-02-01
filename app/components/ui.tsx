@@ -42,10 +42,10 @@ function ChevronDown({ open }: { open: boolean }) {
 export type UiSelectOption =
   | string
   | {
-      label: string;
-      value: string;
-      disabled?: boolean;
-    };
+    label: string;
+    value: string;
+    disabled?: boolean;
+  };
 
 type NormalizedOption = {
   label: string;
@@ -60,6 +60,8 @@ export function UiSelect({
   options,
   placeholder = "Выберите",
   className,
+  error,
+  errorText,
 }: {
   label?: string;
   value: string;
@@ -67,6 +69,8 @@ export function UiSelect({
   options: UiSelectOption[];
   placeholder?: string;
   className?: string;
+  error?: boolean;
+  errorText?: string;
 }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -96,16 +100,28 @@ export function UiSelect({
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "flex w-full items-center justify-between rounded-xl border bg-zinc-50/50 px-3 py-2.5 text-sm font-medium transition-all hover:bg-zinc-100",
-          "border-zinc-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20",
+          "flex w-full items-center justify-between rounded-xl border bg-zinc-50/50 px-3 py-2.5 text-sm font-medium transition-all",
+          error
+            ? "border-red-500 focus:ring-red-500/20 bg-red-50/30"
+            : "border-zinc-200 focus:ring-blue-500/20 hover:bg-zinc-100",
+          "focus:outline-none focus:ring-2",
           "cursor-pointer",
-          open && "border-blue-500 ring-2 ring-blue-500/20 bg-white",
+          open && cn(
+            "ring-2 bg-white",
+            error ? "border-red-500 ring-red-500/20" : "border-blue-500 ring-blue-500/20"
+          ),
           !value ? "text-zinc-400" : "text-zinc-900"
         )}
       >
         <span className="truncate">{currentLabel || placeholder}</span>
         <ChevronDown open={open} />
       </button>
+
+      {errorText && error ? (
+        <span className="block mt-1 ml-1 text-[10px] font-medium text-red-500 leading-tight">
+          {errorText}
+        </span>
+      ) : null}
 
       <AnimatePresence>
         {open ? (
@@ -158,12 +174,16 @@ export function InputField({
   onChange,
   suffix,
   placeholder = "0",
+  error,
+  errorText,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   suffix: string;
   placeholder?: string;
+  error?: boolean;
+  errorText?: string;
 }) {
   return (
     <div className="space-y-1">
@@ -175,12 +195,22 @@ export function InputField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          className="w-full rounded-xl border border-zinc-200 bg-zinc-50/50 px-3 py-2.5 text-sm font-semibold text-zinc-900 outline-none transition-all placeholder:text-zinc-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 group-hover:border-zinc-300"
+          className={cn(
+            "w-full rounded-xl border bg-zinc-50/50 px-3 py-2.5 text-sm font-semibold text-zinc-900 outline-none transition-all placeholder:text-zinc-300 focus:bg-white focus:ring-4",
+            error
+              ? "border-red-500 focus:border-red-500 focus:ring-red-500/10 bg-red-50/30"
+              : "border-zinc-200 focus:border-blue-500 focus:ring-blue-500/10 group-hover:border-zinc-300"
+          )}
         />
         <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-zinc-400">
           {suffix}
         </span>
       </div>
+      {errorText && error ? (
+        <span className="block mt-0.5 ml-1 text-[10px] font-medium text-red-500 leading-tight">
+          {errorText}
+        </span>
+      ) : null}
     </div>
   );
 }

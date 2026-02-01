@@ -163,6 +163,12 @@ export function Calculator() {
       setMode("weight"); // Отводы считаются только по весу (шт)
       if (!qty) setQty("1");
     }
+
+    // Когда выбрали лист/плиту
+    if (assortment === "Лист/плита") {
+      setMode("weight");
+      if (!qty) setQty("1");
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, assortment]);
 
@@ -261,6 +267,36 @@ export function Calculator() {
     showMark = true;
   }
 
+  const validationErrors = useMemo(() => {
+    const errors: Record<string, { active: boolean; message: string }> = {};
+    const dT = toNum(d);
+    const tT = toNum(t);
+    const aT = toNum(a);
+    const bT = toNum(b);
+
+    if (assortment === "Труба круглая") {
+      if (tT > 0 && dT > 0 && tT >= dT / 2) {
+        errors.d = { active: true, message: "" };
+        errors.t = { active: true, message: "Толщина стенки слишком велика для такого диаметра" };
+      }
+    }
+
+    if (assortment === "Труба профильная") {
+      if (tT > 0) {
+        if (aT > 0 && tT >= aT / 2) {
+          errors.a = { active: true, message: "" };
+          errors.t = { active: true, message: "Стенка t не может быть ≥ A/2" };
+        }
+        if (bT > 0 && tT >= bT / 2) {
+          errors.b = { active: true, message: "" };
+          errors.t = { active: true, message: "Стенка t не может быть ≥ B/2" };
+        }
+      }
+    }
+
+    return errors;
+  }, [assortment, d, t, a, b]);
+
   const renderAssortmentFields = () => {
     if (!assortment) {
       return (
@@ -314,7 +350,7 @@ export function Calculator() {
                 />
               )}
 
-              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
+              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
             </div>
           </div>
         )}
@@ -329,6 +365,8 @@ export function Calculator() {
                 value={d}
                 onChange={setD}
                 options={["6", "8", "10", "12", "14", "16", "20", "25", "32", "36"]}
+                error={validationErrors.d?.active}
+                errorText={validationErrors.d?.message}
               />
               <div className="hidden sm:block" />
 
@@ -344,7 +382,7 @@ export function Calculator() {
                 />
               )}
 
-              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
+              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
             </div>
           </div>
         )}
@@ -363,7 +401,14 @@ export function Calculator() {
 
             {/* 1 ряд: сторона a (вторая ячейка пустая на десктопе) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InputField label="Сторона a" value={a} onChange={setA} suffix="мм" />
+              <InputField
+                label="Сторона a"
+                value={a}
+                onChange={setA}
+                suffix="мм"
+                error={validationErrors.a?.active}
+                errorText={validationErrors.a?.message}
+              />
               <div className="hidden sm:block" />
             </div>
 
@@ -379,7 +424,7 @@ export function Calculator() {
                   suffix="кг"
                 />
               )}
-              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
+              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
             </div>
           </div>
         )}
@@ -397,7 +442,14 @@ export function Calculator() {
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InputField label="Диаметр D" value={d} onChange={setD} suffix="мм" />
+              <InputField
+                label="Диаметр D"
+                value={d}
+                onChange={setD}
+                suffix="мм"
+                error={validationErrors.d?.active}
+                errorText={validationErrors.d?.message}
+              />
               <div className="hidden sm:block" />
             </div>
 
@@ -412,7 +464,7 @@ export function Calculator() {
                   suffix="кг"
                 />
               )}
-              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
+              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
             </div>
           </div>
         )}
@@ -431,8 +483,22 @@ export function Calculator() {
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InputField label="Толщина t" value={t} onChange={setT} suffix="мм" />
-              <InputField label="Ширина a" value={a} onChange={setA} suffix="мм" />
+              <InputField
+                label="Толщина t"
+                value={t}
+                onChange={setT}
+                suffix="мм"
+                error={validationErrors.t?.active}
+                errorText={validationErrors.t?.message}
+              />
+              <InputField
+                label="Ширина a"
+                value={a}
+                onChange={setA}
+                suffix="мм"
+                error={validationErrors.a?.active}
+                errorText={validationErrors.a?.message}
+              />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -446,7 +512,7 @@ export function Calculator() {
                   suffix="кг"
                 />
               )}
-              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
+              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
             </div>
           </div>
         )}
@@ -465,13 +531,34 @@ export function Calculator() {
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InputField label="Толщина t" value={t} onChange={setT} suffix="мм" />
-              <InputField label="Ширина a" value={a} onChange={setA} suffix="мм" />
+              <InputField
+                label="Толщина t"
+                value={t}
+                onChange={setT}
+                suffix="мм"
+                error={validationErrors.t?.active}
+                errorText={validationErrors.t?.message}
+              />
+              <InputField
+                label="Ширина a"
+                value={a}
+                onChange={setA}
+                suffix="мм"
+                error={validationErrors.a?.active}
+                errorText={validationErrors.a?.message}
+              />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InputField label="Длина b" value={b} onChange={setB} suffix="мм" />
-              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
+              <InputField
+                label="Длина b"
+                value={b}
+                onChange={setB}
+                suffix="мм"
+                error={validationErrors.b?.active}
+                errorText={validationErrors.b?.message}
+              />
+              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
             </div>
           </div>
         )}
@@ -490,12 +577,33 @@ export function Calculator() {
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InputField label="Ширина A" value={a} onChange={setA} suffix="мм" />
-              <InputField label="Высота B" value={b} onChange={setB} suffix="мм" />
+              <InputField
+                label="Ширина A"
+                value={a}
+                onChange={setA}
+                suffix="мм"
+                error={validationErrors.a?.active}
+                errorText={validationErrors.a?.message}
+              />
+              <InputField
+                label="Высота B"
+                value={b}
+                onChange={setB}
+                suffix="мм"
+                error={validationErrors.b?.active}
+                errorText={validationErrors.b?.message}
+              />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InputField label="Стенка t" value={t} onChange={setT} suffix="мм" />
+              <InputField
+                label="Стенка t"
+                value={t}
+                onChange={setT}
+                suffix="мм"
+                error={validationErrors.t?.active}
+                errorText={validationErrors.t?.message}
+              />
               <div className="hidden sm:block" />
             </div>
 
@@ -510,7 +618,7 @@ export function Calculator() {
                   suffix="кг"
                 />
               )}
-              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
+              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
             </div>
           </div>
         )}
@@ -530,8 +638,22 @@ export function Calculator() {
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InputField label="Внешний диаметр D" value={d} onChange={setD} suffix="мм" />
-              <InputField label="Толщина стенки t" value={t} onChange={setT} suffix="мм" />
+              <InputField
+                label="Внешний диаметр D"
+                value={d}
+                onChange={setD}
+                suffix="мм"
+                error={validationErrors.d?.active}
+                errorText={validationErrors.d?.message}
+              />
+              <InputField
+                label="Толщина стенки t"
+                value={t}
+                onChange={setT}
+                suffix="мм"
+                error={validationErrors.t?.active}
+                errorText={validationErrors.t?.message}
+              />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -545,7 +667,7 @@ export function Calculator() {
                   suffix="кг"
                 />
               )}
-              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
+              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
             </div>
           </div>
         )}
@@ -565,18 +687,39 @@ export function Calculator() {
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InputField label="Ширина полки a" value={a} onChange={setA} suffix="мм" />
-              <InputField label="Высота полки b" value={b} onChange={setB} suffix="мм" />
+              <InputField
+                label="Ширина полки a"
+                value={a}
+                onChange={setA}
+                suffix="мм"
+                error={validationErrors.a?.active}
+                errorText={validationErrors.a?.message}
+              />
+              <InputField
+                label="Высота полки b"
+                value={b}
+                onChange={setB}
+                suffix="мм"
+                error={validationErrors.b?.active}
+                errorText={validationErrors.b?.message}
+              />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InputField label="Толщина полки t" value={t} onChange={setT} suffix="мм" />
+              <InputField
+                label="Толщина полки t"
+                value={t}
+                onChange={setT}
+                suffix="мм"
+                error={validationErrors.t?.active}
+                errorText={validationErrors.t?.message}
+              />
               <div className="hidden sm:block" />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <InputField label="Длина L" value={len} onChange={setLen} suffix="м" />
-              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
+              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
             </div>
           </div>
         )}
@@ -601,7 +744,7 @@ export function Calculator() {
                 options={[...ELBOW_SIZES]}
               />
 
-              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
+              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
             </div>
           </div>
         )}
@@ -627,7 +770,7 @@ export function Calculator() {
                   suffix="кг"
                 />
               )}
-              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
+              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
             </div>
           </div>
         )}
@@ -645,7 +788,14 @@ export function Calculator() {
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <InputField label="Номер шестигранника a" value={a} onChange={setA} suffix="мм" />
+              <InputField
+                label="Номер шестигранника a"
+                value={a}
+                onChange={setA}
+                suffix="мм"
+                error={validationErrors.a?.active}
+                errorText={validationErrors.a?.message}
+              />
               <div className="hidden sm:block" />
             </div>
 
@@ -660,7 +810,7 @@ export function Calculator() {
                   suffix="кг"
                 />
               )}
-              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
+              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
             </div>
           </div>
         )}
@@ -694,7 +844,7 @@ export function Calculator() {
                   suffix="кг"
                 />
               )}
-              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
+              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
             </div>
           )}
       </motion.div>
@@ -740,13 +890,14 @@ export function Calculator() {
                 </button>
                 <button
                   onClick={() => setMode("length")}
-                  disabled={assortment === "Отвод"}
+                  disabled={assortment === "Отвод" || assortment === "Лист/плита"}
                   className={cn(
                     "flex-1 sm:flex-none px-4 py-1.5 text-xs font-bold rounded-[9px] transition-all cursor-pointer",
                     mode === "length"
                       ? "bg-white text-zinc-900 shadow-sm ring-1 ring-black/5"
                       : "text-zinc-500 hover:text-zinc-700",
-                    assortment === "Отвод" && "opacity-50 cursor-not-allowed hover:text-zinc-500"
+                    (assortment === "Отвод" || assortment === "Лист/плита") &&
+                    "opacity-50 cursor-not-allowed hover:text-zinc-500"
                   )}
                 >
                   Длина
@@ -823,7 +974,7 @@ export function Calculator() {
 
               <div className="flex items-baseline gap-2">
                 <span className="text-3xl sm:text-4xl font-black text-blue-600 tracking-tight">
-                  {fmtNum(result)}
+                  {Object.values(validationErrors).some(e => e.active) ? "—" : fmtNum(result)}
                 </span>
                 <span className="text-lg font-bold text-zinc-400">{mode === "weight" ? "кг" : "м"}</span>
               </div>
