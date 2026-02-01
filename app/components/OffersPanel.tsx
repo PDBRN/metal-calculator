@@ -121,7 +121,7 @@ function OfferItem({ offer }: { offer: Offer }) {
                         alt={offer.name}
                         width={48}
                         height={48}
-                        className="h-full w-full object-contain grayscale opacity-70 group-hover:grayscale-0 group-hover:opacity-100 transition-all"
+                        className="h-full w-full object-contain transition-all"
                         unoptimized
                         onError={(e) => (e.currentTarget.src = "/globe.svg")}
                     />

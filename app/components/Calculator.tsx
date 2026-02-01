@@ -350,7 +350,7 @@ export function Calculator() {
                 />
               )}
 
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -382,7 +382,7 @@ export function Calculator() {
                 />
               )}
 
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -424,7 +424,7 @@ export function Calculator() {
                   suffix="кг"
                 />
               )}
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -464,7 +464,7 @@ export function Calculator() {
                   suffix="кг"
                 />
               )}
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -512,7 +512,7 @@ export function Calculator() {
                   suffix="кг"
                 />
               )}
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -618,7 +618,7 @@ export function Calculator() {
                   suffix="кг"
                 />
               )}
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -667,7 +667,7 @@ export function Calculator() {
                   suffix="кг"
                 />
               )}
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -719,7 +719,7 @@ export function Calculator() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <InputField label="Длина L" value={len} onChange={setLen} suffix="м" />
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -744,7 +744,7 @@ export function Calculator() {
                 options={[...ELBOW_SIZES]}
               />
 
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -770,7 +770,7 @@ export function Calculator() {
                   suffix="кг"
                 />
               )}
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -810,7 +810,7 @@ export function Calculator() {
                   suffix="кг"
                 />
               )}
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           </div>
         )}
@@ -844,7 +844,7 @@ export function Calculator() {
                   suffix="кг"
                 />
               )}
-              <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" />
+              {/* <InputField label="Количество" value={qty} onChange={setQty} suffix="шт" /> */}
             </div>
           )}
       </motion.div>
