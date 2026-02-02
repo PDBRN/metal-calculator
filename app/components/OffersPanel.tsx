@@ -111,6 +111,8 @@ export function OffersPanel({ metal, assortment }: OffersPanelProps) {
 }
 
 function OfferItem({ offer }: { offer: Offer }) {
+    const isNumericPrice = !isNaN(Number(offer.priceFrom));
+
     return (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 hover:bg-zinc-50/30 transition-colors group">
             {/* Logo + Name */}
@@ -134,13 +136,21 @@ function OfferItem({ offer }: { offer: Offer }) {
             {/* Price (Middle-Right) */}
             <div className="flex-1 flex justify-end px-2">
                 <div className="text-right">
-                    <span className="text-xs text-zinc-400 tracking-tight mr-1">Цена от:</span>
-                    <span className="text-sm font-semibold text-zinc-700">
-                        {typeof offer.priceFrom === 'number'
-                            ? offer.priceFrom.toLocaleString("ru-RU")
-                            : offer.priceFrom}
-                    </span>
-                    <span className="text-xs text-zinc-400 ml-1">{offer.unit}</span>
+                    {isNumericPrice ? (
+                        <>
+                            <span className="text-xs text-zinc-400 tracking-tight mr-1">Цена от:</span>
+                            <span className="text-sm font-semibold text-zinc-700">
+                                {typeof offer.priceFrom === 'number'
+                                    ? offer.priceFrom.toLocaleString("ru-RU")
+                                    : offer.priceFrom}
+                            </span>
+                            <span className="text-xs text-zinc-400 ml-1">{offer.unit}</span>
+                        </>
+                    ) : (
+                        <span className="text-sm font-semibold text-zinc-700">
+                            {offer.priceFrom}
+                        </span>
+                    )}
                 </div>
             </div>
 
