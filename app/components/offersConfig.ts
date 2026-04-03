@@ -95,6 +95,13 @@ const SHEET_GIDS: Record<METAL_KEY, string> = {
 // Cache for fetched data
 const offersCache: Record<string, Offer[]> = {};
 
+export function getCachedOffers(metal: string, assortment: string): Offer[] | null {
+    const mKey = METAL_MAP[metal];
+    const aKey = ASSORTMENT_MAP[assortment];
+    if (!mKey || !aKey) return null;
+    return offersCache[`${mKey}_${aKey}`] || null;
+}
+
 export async function getOffers(metal: string, assortment: string): Promise<Offer[]> {
     const mKey = METAL_MAP[metal];
     const aKey = ASSORTMENT_MAP[assortment];

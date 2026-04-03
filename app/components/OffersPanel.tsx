@@ -2,10 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { getOffers, Offer } from "./offersConfig";
 import { cn } from "./ui";
-
 import Image from "next/image";
+import { getOffers, getCachedOffers, Offer } from "./offersConfig";
 
 interface OffersPanelProps {
     metal: string;
@@ -13,109 +12,137 @@ interface OffersPanelProps {
 }
 
 export function OffersPanel({ metal, assortment }: OffersPanelProps) {
-    const [offers, setOffers] = useState<Offer[]>([]);
-    const [visible, setVisible] = useState(false);
     const [expanded, setExpanded] = useState(false);
+    
+    const [offers, setOffers] = useState<Offer[]>(() => {
+        return getCachedOffers(metal, assortment) || [];
+    });
+    const [loading, setLoading] = useState(() => {
+        return !getCachedOffers(metal, assortment);
+    });
 
     useEffect(() => {
-        // Load offers asynchronously
-        const loadOffers = async () => {
-            const data = await getOffers(metal, assortment);
-            setOffers(data);
-            setVisible(data.length > 0);
-        };
-        loadOffers();
+        const cached = getCachedOffers(metal, assortment);
+        if (cached) {
+            setOffers(cached);
+            setLoading(false);
+        } else {
+            setLoading(true);
+            getOffers(metal, assortment).then((data) => {
+                setOffers(data);
+                setLoading(false);
+            });
+        }
     }, [metal, assortment]);
 
-    if (!visible || offers.length === 0) return null;
-
     return (
-        <div className="w-full">
-            {/* Tizer / Header */}
-            <motion.div
-                initial={{ opacity: 0, y: 15 }}
-                animate={{
-                    opacity: 1,
-                    y: 0,
-                }}
-                transition={{
-                    type: "spring",
-                    stiffness: 120,
-                    damping: 20,
-                    mass: 0.8,
-                }}
-                className="overflow-hidden relative group rounded-b-2xl border border-zinc-100 bg-white"
+        <div className="w-full overflow-hidden rounded-b-3xl bg-white border-t border-zinc-100 ring-1 ring-zinc-100 shadow-xl shadow-zinc-200/50">
+            {/* Шапка (Кнопка для раскрытия) */}
+            <div
+                onClick={() => setExpanded(!expanded)}
+                className={cn(
+                    "flex w-full cursor-pointer items-center justify-between px-6 py-5 transition-colors",
+                    // Когда свёрнуто — hover скругляет низ вместе с контейнером
+                    !expanded && "rounded-b-3xl hover:bg-zinc-50/80",
+                    // Когда развёрнуто — верхний блок без нижнего скругления
+                    expanded && "bg-zinc-50/60 hover:bg-zinc-50/80"
+                )}
             >
-
-                <div
-                    onClick={() => setExpanded(!expanded)}
-                    className={cn(
-                        "flex w-full cursor-pointer items-center justify-between px-6 py-5 transition-colors hover:bg-zinc-50/50 relative z-20",
-                        expanded && "bg-zinc-50/50 border-b border-zinc-100"
-                    )}
-                >
-                    <div className="flex items-center gap-2">
-                        <div className="relative flex h-5 w-5 items-center justify-center">
-                            <div className="h-2 w-2 rounded-full bg-blue-500 z-10" />
-                            <motion.div
-                                initial={{ scale: 1, opacity: 0 }}
-                                animate={{
-                                    scale: [1, 4],
-                                    opacity: [0, 0.5, 0]
-                                }}
-                                transition={{
-                                    repeat: Infinity,
-                                    duration: 4,
-                                    repeatDelay: 1,
-                                    ease: "easeOut",
-                                    times: [0, 0.2, 1]
-                                }}
-                                className="absolute h-2 w-2 rounded-full bg-blue-400"
-                            />
-                        </div>
-                        <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
-                            Где можно купить: <span className="text-zinc-900 ml-1">{offers.length}</span>
-                        </span>
+                <div className="flex items-center gap-3">
+                    {/* Плавная волновая анимация без мигания */}
+                    <div className="relative flex items-center justify-center h-4 w-4">
+                        <motion.div
+                            className="absolute h-2.5 w-2.5 rounded-full bg-blue-400/50"
+                            animate={{
+                                scale: [1, 2.8, 3],
+                                opacity: [0, 0.5, 0],
+                            }}
+                            transition={{
+                                duration: 3,
+                                repeat: Infinity,
+                                ease: "easeOut",
+                                times: [0, 0.7, 1],
+                            }}
+                        />
+                        <motion.div
+                            className="absolute h-2.5 w-2.5 rounded-full bg-blue-400/30"
+                            animate={{
+                                scale: [1, 2.4, 2.6],
+                                opacity: [0, 0.4, 0],
+                            }}
+                            transition={{
+                                duration: 3,
+                                repeat: Infinity,
+                                ease: "easeOut",
+                                times: [0, 0.7, 1],
+                                delay: 1,
+                            }}
+                        />
+                        <div className="relative h-2.5 w-2.5 rounded-full bg-blue-500 shadow-sm shadow-blue-500/40" />
                     </div>
-
-                    <div className="flex items-center gap-2">
-                        <Chevron rotated={expanded} />
-                    </div>
+                    <span className="text-sm font-bold text-zinc-600 uppercase tracking-widest">
+                        Где можно купить: <span className="text-zinc-900 ml-1">{loading ? "..." : offers.length}</span>
+                    </span>
                 </div>
 
-                {/* Expanded Content */}
-                <AnimatePresence initial={false}>
-                    {expanded && (
-                        <motion.div
-                            key="content"
-                            initial={{ height: 0, opacity: 0 }}
-                            animate={{ height: "auto", opacity: 1 }}
-                            exit={{ height: 0, opacity: 0 }}
-                            transition={{
-                                height: { duration: 0.8, ease: [0.4, 0, 0.2, 1] },
-                                opacity: { duration: 0.4 }
-                            }}
-                            className="overflow-hidden bg-white"
-                        >
-                            <div className="divide-y divide-zinc-100">
-                                {offers.map((offer, idx) => (
-                                    <OfferItem key={idx} offer={offer} />
-                                ))}
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-            </motion.div>
+                <div className="flex items-center gap-2">
+                    <Chevron rotated={expanded} />
+                </div>
+            </div>
+
+            {/* Раскрывающийся контент — Apple-style плавный spring */}
+            <AnimatePresence initial={false}>
+                {expanded && (
+                    <motion.div
+                        key="content"
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{
+                            height: {
+                                duration: 0.5,
+                                ease: [0.25, 1, 0.5, 1],
+                            },
+                            opacity: {
+                                duration: 0.35,
+                                ease: "easeInOut",
+                            },
+                        }}
+                        className="overflow-hidden"
+                    >
+                        <div className="divide-y divide-zinc-100 border-t border-zinc-100">
+                            {loading ? (
+                                <div className="p-6 text-center text-sm text-zinc-400">Загрузка предложений...</div>
+                            ) : offers.length === 0 ? (
+                                <div className="p-6 text-center text-sm text-zinc-400">Нет предложений для данного товара</div>
+                            ) : (
+                                offers.map((offer, idx) => (
+                                    <OfferItem key={idx} offer={offer} index={idx} />
+                                ))
+                            )}
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
 
-function OfferItem({ offer }: { offer: Offer }) {
+function OfferItem({ offer, index }: { offer: any; index: number }) {
     const isNumericPrice = !isNaN(Number(offer.priceFrom));
 
     return (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 hover:bg-zinc-50/30 transition-colors group">
-            {/* Logo + Name */}
+        <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+                duration: 0.35,
+                delay: index * 0.06,
+                ease: [0.25, 1, 0.5, 1],
+            }}
+            className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 hover:bg-zinc-50/50 transition-colors duration-200 group"
+        >
+            {/* Логотип + Название */}
             <div className="flex items-center gap-4 w-full sm:w-auto overflow-hidden">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-zinc-100 bg-white p-2 shadow-sm">
                     <Image
@@ -133,7 +160,7 @@ function OfferItem({ offer }: { offer: Offer }) {
                 </div>
             </div>
 
-            {/* Price (Middle-Right) */}
+            {/* Цена */}
             <div className="flex-1 flex justify-end px-2">
                 <div className="text-right">
                     {isNumericPrice ? (
@@ -154,7 +181,7 @@ function OfferItem({ offer }: { offer: Offer }) {
                 </div>
             </div>
 
-            {/* Actions */}
+            {/* Кнопки */}
             <div className="flex w-full sm:w-auto items-center gap-3 justify-end shrink-0">
                 <a
                     href={`tel:${offer.phone}`}
@@ -172,7 +199,7 @@ function OfferItem({ offer }: { offer: Offer }) {
                     Перейти в каталог
                 </a>
             </div>
-        </div>
+        </motion.div>
     );
 }
 
@@ -180,17 +207,12 @@ function Chevron({ rotated }: { rotated: boolean }) {
     return (
         <motion.svg
             animate={{ rotate: rotated ? 180 : 0 }}
+            transition={{ duration: 0.4, ease: [0.25, 1, 0.5, 1] }}
             className="h-4 w-4 text-zinc-400"
             viewBox="0 0 20 20"
             fill="none"
         >
-            <path
-                d="M5 7.5L10 12.5L15 7.5"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            />
+            <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </motion.svg>
     );
 }
@@ -198,11 +220,7 @@ function Chevron({ rotated }: { rotated: boolean }) {
 function PhoneIcon() {
     return (
         <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-            <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
         </svg>
     );
 }

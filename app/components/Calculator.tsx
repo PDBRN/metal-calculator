@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect } from "react";
+import { useMemo, useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { CHANNEL_KG_PER_M } from "./data";
 
@@ -22,6 +22,7 @@ import {
   Metal,
 } from "./data";
 import type { ElbowExecution, ElbowSize } from "./data";
+import { getOffers } from "./offersConfig";
 import { calculateResult, calcPlateArea } from "./calc";
 import type { CalcInputs } from "./calc";
 import AssortmentScheme from "./schemes";
@@ -32,30 +33,41 @@ console.log("[BUNDLE] Calculator.tsx LOADED");
 
 type Mode = "weight" | "length";
 
-export function Calculator() {
+interface CalculatorProps {
+  initialMetal?: Metal;
+  initialAssortment?: string;
+  seoTitle?: string;
+  seoTitleSuffix?: string;
+}
+
+export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitleSuffix }: CalculatorProps = {}) {
   console.log("[CALC] Render Calculator");
   const router = useRouter();
   const searchParams = useSearchParams();
 
   // --- Верхний уровень ---
-  const [metal, setMetal] = useState<Metal>("Чёрный");
-  const [assortment, setAssortment] = useState("");
+  const [metal, setMetal] = useState<Metal>(initialMetal || "Чёрный");
+  const [assortment, setAssortment] = useState(initialAssortment || "");
   const [mode, setMode] = useState<Mode>("weight");
-  const [isMounted, setIsMounted] = useState(false);
+
+  // Синхронизация пропсов при софт-навигации (Next.js Link)
+  useEffect(() => {
+    if (initialMetal) setMetal(initialMetal);
+    if (initialAssortment) setAssortment(initialAssortment);
+  }, [initialMetal, initialAssortment]);
 
   // Синхронизация с URL при первом входе
   useEffect(() => {
     console.log("[CALC] Client Mount - Syncing Params");
-    setIsMounted(true);
     const metalParam = searchParams.get("metal") as Metal;
     const assortmentParam = searchParams.get("assortment");
     const modeParam = searchParams.get("mode") as Mode;
 
-    if (isMetal(metalParam)) {
+    if (!initialMetal && isMetal(metalParam)) {
       console.log("[CALC] Set metal from param:", metalParam);
       setMetal(metalParam);
     }
-    if (assortmentParam) {
+    if (!initialAssortment && assortmentParam) {
       console.log("[CALC] Set assortment from param:", assortmentParam);
       setAssortment(assortmentParam);
     }
@@ -118,11 +130,11 @@ export function Calculator() {
   const handleMetalChange = (v: string) => {
     if (isMetal(v)) {
       setMetal(v);
+      setAssortment(""); // Сбрасываем сортамент только при ручном выборе
     }
   };
 
   useEffect(() => {
-    setAssortment("");
     setResult(0);
 
     // Сброс марки / сплава
@@ -236,6 +248,13 @@ export function Calculator() {
   let markOptions: string[] = [];
   let markLabel = "Марка стали";
   let showMark = false;
+
+  useEffect(() => {
+    if (metal && assortment) {
+      // Предзагрузка предложений в фоновом режиме в кэш
+      getOffers(metal, assortment).catch(() => {});
+    }
+  }, [metal, assortment]);
 
   if (metal === "Чёрный") {
     markOptions = [...STEEL_GRADES];
@@ -851,30 +870,26 @@ export function Calculator() {
     );
   };
 
-  if (!isMounted) {
-    console.log("[CALC] Waiting for mount...");
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#F3F4F6] text-zinc-500">
-        Инициализация калькулятора...
-      </div>
-    );
-  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#F3F4F6] p-4 text-zinc-900 font-sans">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-4xl overflow-hidden rounded-3xl bg-white shadow-2xl shadow-zinc-200/50 ring-1 ring-zinc-100"
-      >
+    <div className="w-full flex justify-center text-zinc-900 font-sans">
+      <div className="w-full max-w-4xl flex flex-col">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={cn(
+            "w-full overflow-hidden bg-white shadow-2xl shadow-zinc-200/50 ring-1 ring-zinc-100 transition-all duration-300",
+            result > 0 ? "rounded-t-3xl rounded-b-none" : "rounded-3xl"
+          )}
+        >
         <div className="flex flex-col md:flex-row h-full">
           {/* ЛЕВАЯ КОЛОНКА */}
           <div className="flex-1 p-6 md:p-8 space-y-6">
             {/* Заголовок + режим */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <h1 className="text-xl font-extrabold tracking-tight text-zinc-900">
+              <h2 className="text-xl font-extrabold tracking-tight text-zinc-900">
                 Калькулятор<span className="text-blue-600"> металла</span>
-              </h1>
+              </h2>
 
               <div className="flex bg-zinc-100 p-1 rounded-xl w-full sm:w-auto">
                 <button
@@ -993,13 +1008,15 @@ export function Calculator() {
           </div>
         </div>
 
-        {/* Блок предложений (на всю ширину) */}
+        </motion.div>
+
+        {/* Блок предложений — ВЫНЕСЕН за пределы motion.div */}
         {result > 0 && (
-          <div className="border-t border-zinc-100 bg-white">
+          <div className="w-full">
             <OffersPanel metal={metal} assortment={assortment} />
           </div>
         )}
-      </motion.div>
+      </div>
     </div>
   );
 }
