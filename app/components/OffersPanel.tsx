@@ -52,9 +52,9 @@ export function OffersPanel({ metal, assortment }: OffersPanelProps) {
                     {/* Плавная волновая анимация без мигания */}
                     <div className="relative flex items-center justify-center h-4 w-4">
                         <motion.div
-                            className="absolute h-2.5 w-2.5 rounded-full bg-blue-400/50"
+                            className="absolute h-2 w-2 rounded-full bg-blue-400/50"
                             animate={{
-                                scale: [1, 2.8, 3],
+                                scale: [1, 2.5, 2.8],
                                 opacity: [0, 0.5, 0],
                             }}
                             transition={{
@@ -65,9 +65,9 @@ export function OffersPanel({ metal, assortment }: OffersPanelProps) {
                             }}
                         />
                         <motion.div
-                            className="absolute h-2.5 w-2.5 rounded-full bg-blue-400/30"
+                            className="absolute h-2 w-2 rounded-full bg-blue-400/30"
                             animate={{
-                                scale: [1, 2.4, 2.6],
+                                scale: [1, 2.2, 2.4],
                                 opacity: [0, 0.4, 0],
                             }}
                             transition={{
@@ -78,9 +78,9 @@ export function OffersPanel({ metal, assortment }: OffersPanelProps) {
                                 delay: 1,
                             }}
                         />
-                        <div className="relative h-2.5 w-2.5 rounded-full bg-blue-500 shadow-sm shadow-blue-500/40" />
+                        <div className="relative h-2 w-2 rounded-full bg-blue-500 shadow-sm shadow-blue-500/40" />
                     </div>
-                    <span className="text-sm font-bold text-zinc-600 uppercase tracking-widest">
+                    <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
                         Где можно купить: <span className="text-zinc-900 ml-1">{loading ? "..." : offers.length}</span>
                     </span>
                 </div>

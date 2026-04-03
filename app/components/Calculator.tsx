@@ -63,11 +63,11 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
     const assortmentParam = searchParams.get("assortment");
     const modeParam = searchParams.get("mode") as Mode;
 
-    if (!initialMetal && isMetal(metalParam)) {
+    if (isMetal(metalParam)) {
       console.log("[CALC] Set metal from param:", metalParam);
       setMetal(metalParam);
     }
-    if (!initialAssortment && assortmentParam) {
+    if (assortmentParam) {
       console.log("[CALC] Set assortment from param:", assortmentParam);
       setAssortment(assortmentParam);
     }
