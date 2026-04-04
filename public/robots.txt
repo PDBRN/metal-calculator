@@ -6,7 +6,5 @@ Disallow: /test1/
 Disallow: /roadmap/
 
 # Яндекс: предпочтительное зеркало
-Host: https://metalpro.online
-
-# XML Sitemap (для Google и Яндекса)
-Sitemap: https://metalpro.online/sitemap.xml
+Host: https://metall-calculator.ru
+Sitemap: https://metall-calculator.ru/sitemap.xml

@@ -48,7 +48,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "ru_RU",
-    siteName: "MetalPro — Калькулятор металла",
+    siteName: "Metall Calculator — Калькулятор металла",
   },
 };
 

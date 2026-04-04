@@ -4,7 +4,7 @@ import type { MetadataRoute } from "next";
 // Для static export
 export const dynamic = "force-static";
 
-const SITE_URL = "https://metalpro.online";
+const SITE_URL = "https://metall-calculator.ru";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const entries: MetadataRoute.Sitemap = [];

@@ -7,15 +7,15 @@ export const metadata: Metadata = {
   title: "Калькулятор металла онлайн | Точный вес и длина металлопроката",
   description: "Удобный онлайн калькулятор для расчета веса, длины и площади металлопроката. Черный, нержавеющий, алюминиевый и медный прокат. Без регистрации и таблиц.",
   alternates: {
-    canonical: "https://metalpro.online/",
+    canonical: "https://metall-calculator.ru/",
   },
   openGraph: {
     type: "website",
     locale: "ru_RU",
-    siteName: "MetalPro — Калькулятор металла",
+    siteName: "Metall Calculator — Калькулятор металла",
     title: "Калькулятор металла онлайн | Точный вес и длина металлопроката",
     description: "Удобный онлайн калькулятор для расчета веса, длины и площади металлопроката. Черный, нержавеющий, алюминиевый и медный прокат.",
-    url: "https://metalpro.online/",
+    url: "https://metall-calculator.ru/",
   },
 };
 
@@ -57,6 +57,26 @@ export default function Home() {
           </div>
         </div>
       </div>
+      {/* JSON-LD Микроразметка (WebApplication) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebApplication",
+            "name": "Metall Calculator онлайн — Вес и длина",
+            "url": "https://metall-calculator.ru/",
+            "applicationCategory": "UtilityApplication",
+            "operatingSystem": "All",
+            "description": "Универсальный калькулятор для расчета веса, длины и площади металлопроката: чёрный, нержавеющий, цветной металл.",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "RUB"
+            }
+          })
+        }}
+      />
     </main>
   );
 }

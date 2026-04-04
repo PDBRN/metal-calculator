@@ -21,7 +21,7 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ metal: string, assortment: string }> }): Promise<Metadata> {
   const resolvedParams = await params;
   const { title, description } = getSeoData(resolvedParams.metal, resolvedParams.assortment);
-  const canonicalUrl = `https://metalpro.online/${resolvedParams.metal}/${resolvedParams.assortment}/`;
+  const canonicalUrl = `https://metall-calculator.ru/${resolvedParams.metal}/${resolvedParams.assortment}/`;
   return {
     title,
     description,
@@ -31,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ metal: st
     openGraph: {
       type: "website",
       locale: "ru_RU",
-      siteName: "MetalPro — Калькулятор металла",
+      siteName: "Metall Calculator — Калькулятор металла",
       title,
       description,
       url: canonicalUrl,
@@ -114,6 +114,35 @@ export default async function SeoPage({ params }: { params: Promise<{ metal: str
         </div>
 
       </div>
+      {/* 6. JSON-LD Микроразметка (Хлебные крошки) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Главная",
+                "item": "https://metall-calculator.ru/"
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "name": metalName,
+                "item": `https://metall-calculator.ru/${resolvedParams.metal}/`
+              },
+              {
+                "@type": "ListItem",
+                "position": 3,
+                "name": assortmentName
+              }
+            ]
+          })
+        }}
+      />
     </main>
   );
 }
