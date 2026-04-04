@@ -1,7 +1,11 @@
 "use client";
 
 import { useMemo, useState, useEffect, useRef } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { SEO_DATA, DEFAULT_SEO } from "./data/seoData";
+import type { NavLink } from "./data/seoData";
+import { METAL_TO_ASSORTMENTS, ASSORTMENT_SLUG_TO_NAME, METAL_SLUG_TO_NAME, getSeoData } from "../lib/seo-engine";
 import { CHANNEL_KG_PER_M } from "./data";
 
 import { cn, fmtNum, toNum, UiSelect, InputField } from "./ui";
@@ -38,9 +42,11 @@ interface CalculatorProps {
   initialAssortment?: string;
   seoTitle?: string;
   seoTitleSuffix?: string;
+  showHistory?: boolean;
+  isMainPage?: boolean;
 }
 
-export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitleSuffix }: CalculatorProps = {}) {
+export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitleSuffix, showHistory = false, isMainPage = false }: CalculatorProps = {}) {
   console.log("[CALC] Render Calculator");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -112,6 +118,48 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
 
   // Переключение правой панели: чертеж или история
   const [rightPanel, setRightPanel] = useState<"scheme" | "history">("scheme");
+
+  // Динамические данные для СЕО блока (пресеты)
+  const seoMetadata = useMemo(() => {
+    if (metal === "Нержавейка") return SEO_DATA["Нержавейка"];
+    return SEO_DATA[assortment] || DEFAULT_SEO;
+  }, [metal, assortment]);
+
+  // Динамические ссылки "Смотрите также"
+  // Главная страница — кросс-металловые ссылки (статичные)
+  // Внутренние страницы — другие сортаменты того же металла
+  const MAIN_PAGE_LINKS: NavLink[] = [
+    { name: "Калькулятор веса стального металлопроката", href: "/black/pipe-round/" },
+    { name: "Калькулятор веса нержавеющего проката", href: "/stainless/sheet/" },
+    { name: "Калькулятор веса алюминиевого проката", href: "/aluminum/sheet/" },
+    { name: "Калькулятор веса медного проката", href: "/copper/pipe-round/" },
+    { name: "Калькулятор веса латунного проката", href: "/brass/circle/" },
+    { name: "Калькулятор веса бронзового проката", href: "/bronze/circle/" },
+    { name: "Калькулятор веса титанового проката", href: "/titanium/sheet/" },
+  ];
+
+  const seeAlsoLinks = useMemo((): NavLink[] => {
+    if (isMainPage) return MAIN_PAGE_LINKS;
+
+    // Находим slug текущего металла
+    const metalSlug = Object.entries(METAL_SLUG_TO_NAME).find(([, name]) => name === metal)?.[0];
+    if (!metalSlug) return MAIN_PAGE_LINKS;
+
+    // Находим slug текущего сортамента
+    const currentAssortmentSlug = Object.entries(ASSORTMENT_SLUG_TO_NAME).find(([, name]) => name === assortment)?.[0];
+
+    // Все сортаменты этого металла, кроме текущего
+    const assortments = METAL_TO_ASSORTMENTS[metalSlug] || [];
+    return assortments
+      .filter(slug => slug !== currentAssortmentSlug)
+      .map(slug => {
+        const { h1_suffix } = getSeoData(metalSlug, slug);
+        return {
+          name: `Калькулятор веса ${h1_suffix}`,
+          href: `/${metalSlug}/${slug}/`
+        };
+      });
+  }, [metal, assortment, isMainPage]);
 
   // Статичная история для примера
   const history = [
@@ -890,7 +938,7 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className={cn(
-            "w-full bg-white shadow-2xl shadow-zinc-200/50 ring-1 ring-zinc-100 transition-all duration-300 relative",
+            "w-full bg-white shadow-2xl shadow-zinc-200/50 ring-1 ring-zinc-100 transition-all duration-300 relative overflow-hidden",
             result > 0 ? "rounded-t-3xl rounded-b-none" : "rounded-3xl"
           )}
         >
@@ -977,14 +1025,15 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
             "order-last md:order-none w-full md:w-[340px] bg-zinc-50 border-t md:border-t-0 md:border-l border-zinc-100 p-6 sm:p-8 md:p-10 flex flex-col justify-between relative h-[560px]",
             rightPanel === "history" && "bg-white text-zinc-900 shadow-sm"
           )}>
-            {/* КОМПАКТНАЯ ЗАКЛАДКА "ИСТОРИЯ" */}
+            {/* КОМПАКТНАЯ ЗАКЛАДКА "ИСТОРИЯ" — только на test1 */}
+            {showHistory && (
             <button 
               onClick={() => setRightPanel(rightPanel === "scheme" ? "history" : "scheme")}
               className={cn(
-                "absolute -right-[32px] top-4 h-24 w-8 border border-zinc-200 flex flex-col items-center justify-center transition-all group z-30 shadow-sm",
+                "absolute -right-[32px] top-0 h-24 w-8 border border-zinc-200 flex flex-col items-center justify-center transition-all group z-30 shadow-sm",
                 rightPanel === "history" 
-                  ? "bg-blue-600 border-blue-600 rounded-r-xl shadow-lg ring-2 ring-blue-500/10" 
-                  : "bg-zinc-100 rounded-r-xl hover:bg-zinc-50 hover:translate-x-[2px]"
+                  ? "bg-blue-600 border-blue-600 rounded-r-xl rounded-tl-none shadow-lg ring-2 ring-blue-500/10" 
+                  : "bg-zinc-100 rounded-br-xl rounded-tr-xl hover:bg-zinc-50 hover:translate-x-[2px]"
               )}
             >
               {/* Подсветка сбоку (слева внутри кнопки) */}
@@ -1000,6 +1049,7 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
                 {rightPanel === "history" ? "Чертеж" : "История"}
               </div>
             </button>
+            )}
 
             <div className="absolute top-0 right-0 -mt-10 -mr-10 h-40 w-40 rounded-full bg-blue-500/10 blur-3xl pointer-events-none opacity-50" />
 
@@ -1065,10 +1115,10 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
               </div>
 
               <div className="flex items-baseline gap-2">
-                <span className="text-4xl sm:text-5xl font-black text-blue-600 tracking-tighter leading-none">
+                <span className="text-2xl sm:text-3xl font-black text-blue-600 tracking-tighter leading-none">
                   {Object.values(validationErrors).some(e => e.active) ? "—" : fmtNum(result)}
                 </span>
-                <span className="text-xl font-bold text-zinc-300 tracking-tighter uppercase">{mode === "weight" ? "кг" : "м"}</span>
+                <span className="text-sm font-bold text-zinc-300 tracking-tighter uppercase">{mode === "weight" ? "кг" : "м"}</span>
               </div>
 
               <div className="text-[9px] font-bold text-zinc-400/80 mt-1 h-3 uppercase tracking-[0.1em]">
@@ -1080,12 +1130,87 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
 
         </motion.div>
 
-        {/* Блок предложений — ВЫНЕСЕН за пределы motion.div */}
+        {/* Блок предложений — СРАЗУ под калькулятором */}
         {result > 0 && (
           <div className="w-full">
             <OffersPanel metal={metal} assortment={assortment} />
           </div>
         )}
+
+        {/* БЛОК СЕО: СМОТРИТЕ ТАКЖЕ + УМНЫЕ ПРЕСЕТЫ */}
+        <div className="w-full mt-16 mb-6 px-6 md:px-0">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-zinc-900">
+            {/* Левая колонка: См. также */}
+            <motion.div
+              key={`nav-${assortment}`}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-400 mb-6 flex items-center gap-3">
+                Смотрите также
+                <div className="h-px flex-1 bg-zinc-100" />
+              </h3>
+              <ul className="space-y-3">
+                {seeAlsoLinks.map((link, i) => (
+                  <li key={i}>
+                    <Link 
+                      href={link.href}
+                      className="text-[12px] font-medium text-zinc-500 hover:text-blue-600 transition-colors flex items-center gap-2 group"
+                    >
+                      <div className="w-1 h-1 rounded-full bg-zinc-300 group-hover:bg-blue-500 transition-colors" />
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </motion.div>
+
+            {/* Правая колонка: Умные пресеты */}
+            <motion.div
+              key={`presets-${assortment}`}
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <h3 className="text-[10px] font-black uppercase tracking-[0.25em] text-zinc-400 mb-6 flex items-center gap-3">
+                {seoMetadata.presetTitle}
+                <div className="h-px flex-1 bg-zinc-100" />
+              </h3>
+              <div className="flex flex-wrap gap-2">
+                {seoMetadata.presets.map((preset, i) => (
+                  <button 
+                    key={i} 
+                    onClick={() => {
+                      if (preset.field === "steelMark") setSteelMark(preset.value);
+                      else if (preset.field === "d") setD(preset.value);
+                      else if (preset.field === "beamNumber") {
+                        if (preset.beamType) setBeamType(preset.beamType);
+                        setBeamNumber(preset.value);
+                      }
+                      else if (preset.field === "channelNumber") setChannelNumber(preset.value);
+                      else if (preset.field === "elbowSize") setElbowSize(preset.value as ElbowSize);
+                    }}
+                    className="px-4 py-2.5 bg-zinc-50 border border-zinc-100 rounded-xl text-[11px] font-black text-zinc-600 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 transition-all cursor-pointer shadow-sm hover:shadow-md active:scale-95"
+                    title={`${seoMetadata.presetHint}: ${preset.label}`}
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+              <p className="text-[9px] font-bold text-zinc-300 mt-4 uppercase tracking-wider">
+                * {seoMetadata.presetHint}
+              </p>
+            </motion.div>
+          </div>
+
+          {/* SEO-описание (видимый, легальный текст с ключевыми словами) */}
+          <p className="text-[11px] text-zinc-400 leading-relaxed mt-8 max-w-2xl">
+            {seoMetadata.seoDescription.split('\n').map((line, i) => (
+              <span key={i}>{line}{i < seoMetadata.seoDescription.split('\n').length - 1 && <br />}</span>
+            ))}
+          </p>
+        </div>
       </div>
     </div>
   );

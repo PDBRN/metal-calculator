@@ -4,8 +4,8 @@ import { BEAM_DIMS } from "./data/beamDims";
 // Общие настройки стилей схемы
 const size = 260;
 const center = size / 2;
-const strokeColor = "#18181b"; // черный
-const dimColor = "#2563EB"; // синий
+const strokeColor = "#6b7280"; // мягкий серый (zinc-500)
+const dimColor = "#93a8c4"; // мягкий приглушённый синий
 
 const Defs = () => (
   <defs>
@@ -130,18 +130,18 @@ const DimDiameter = ({ x1, x2, yTouch, yDim, label }: DimDiameterProps) => {
 
   return (
     <g>
-      {/* выносные линии */}
-      <line x1={x1} y1={yTouch} x2={x1} y2={yDim} stroke={dimColor} strokeWidth="1.5" />
-      <line x1={x2} y1={yTouch} x2={x2} y2={yDim} stroke={dimColor} strokeWidth="1.5" />
+      {/* выносные линии — тонкие, полупрозрачные (как у Квадрата) */}
+      <line x1={x1} y1={yTouch} x2={x1} y2={yDim} stroke={dimColor} strokeWidth="0.5" opacity="0.5" />
+      <line x1={x2} y1={yTouch} x2={x2} y2={yDim} stroke={dimColor} strokeWidth="0.5" opacity="0.5" />
 
-      {/* размерная линия */}
+      {/* размерная линия — плотная со стрелками */}
       <line
         x1={x1}
         y1={yDim}
         x2={x2}
         y2={yDim}
         stroke={dimColor}
-        strokeWidth="2"
+        strokeWidth="1.5"
         markerStart="url(#arrow-rev)"
         markerEnd="url(#arrow)"
       />
@@ -436,7 +436,7 @@ export default function AssortmentScheme({ assortment, d, a, b, t, beamType }: S
         )}
         <line x1={center} y1={center - r - 15} x2={center} y2={center + r + 15} strokeWidth="1" className="dash" />
         <line x1={center - r - 15} y1={center} x2={center + r + 15} y2={center} strokeWidth="1" className="dash" />
-        <Dim x1={center - r} y1={center + r} x2={center + r} y2={center + r} label={`D ${d || "?"}`} offset={25} />
+        <DimDiameter x1={center - r} x2={center + r} yTouch={center} yDim={center + r + 25} label={`D ${d || "?"}`} />
       </Wrapper>
     );
   }
@@ -580,11 +580,12 @@ export default function AssortmentScheme({ assortment, d, a, b, t, beamType }: S
           offset={40}
         />
 
-        {/* Толщина стенки s (Полочка с числом сверху) */}
+        {/* Толщина стенки s */}
         <g>
           <line x1={x0 - 15} y1={center} x2={x0} y2={center} stroke={dimColor} strokeWidth="1" markerEnd="url(#arrow)" />
-          <line x1={webInnerX} y1={center} x2={webInnerX + 25} y2={center} stroke={dimColor} strokeWidth="1" markerStart="url(#arrow)" />
-          <text x={webInnerX + 12.5} y={center - 4} fill={dimColor} fontSize="11" fontWeight="700" textAnchor="middle">
+          <line x1={webInnerX + 15} y1={center} x2={webInnerX} y2={center} stroke={dimColor} strokeWidth="1" markerEnd="url(#arrow)" />
+          <line x1={webInnerX + 5} y1={center} x2={webInnerX + 25} y2={center} stroke={dimColor} strokeWidth="0.5" />
+          <text x={webInnerX + 18} y={center - 4} fill={dimColor} fontSize="11" fontWeight="700" textAnchor="middle">
             {dims.s}
           </text>
         </g>

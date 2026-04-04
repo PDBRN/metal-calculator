@@ -32,7 +32,7 @@ export default function Home() {
               </div>
             </div>
           }>
-            <Calculator initialMetal="Чёрный" initialAssortment="Труба круглая" />
+            <Calculator initialMetal="Чёрный" initialAssortment="Труба круглая" isMainPage={true} />
           </Suspense>
         </div>
 

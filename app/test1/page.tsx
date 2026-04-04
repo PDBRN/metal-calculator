@@ -61,7 +61,7 @@ export default function Test1Page() {
 
         {/* Калькулятор с интегрированной историей (теперь внутри компонента) */}
         <Suspense fallback={<div className="h-[560px] flex items-center justify-center text-zinc-400">Загрузка калькулятора...</div>}>
-          <Calculator initialMetal="Чёрный" initialAssortment="Арматура" />
+          <Calculator initialMetal="Чёрный" initialAssortment="Арматура" showHistory={true} />
         </Suspense>
       </div>
 
