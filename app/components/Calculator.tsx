@@ -110,6 +110,18 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
 
   const [area, setArea] = useState(0);
 
+  // Переключение правой панели: чертеж или история
+  const [rightPanel, setRightPanel] = useState<"scheme" | "history">("scheme");
+
+  // Статичная история для примера
+  const history = [
+    { metal: "Чёрный", item: "Труба 40x20x2", weight: "125.4 кг", date: "14:20" },
+    { metal: "Нержавейка", item: "AISI 304 3мм", weight: "48.2 кг", date: "13:45" },
+    { metal: "Алюминий", item: "Уголок 50х50х5", weight: "12.8 кг", date: "12:10" },
+    { metal: "Чёрный", item: "A500C 12мм", weight: "342 кг", date: "Вчера" },
+    { metal: "Медь", item: "Пруток 20мм", weight: "5.4 кг", date: "2 дн. назад" },
+  ];
+
   // Список сортамента по металлу
   const availableAssortments = useMemo(() => METAL_DATA[metal] || [], [metal]);
 
@@ -878,7 +890,7 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className={cn(
-            "w-full overflow-hidden bg-white shadow-2xl shadow-zinc-200/50 ring-1 ring-zinc-100 transition-all duration-300",
+            "w-full bg-white shadow-2xl shadow-zinc-200/50 ring-1 ring-zinc-100 transition-all duration-300 relative",
             result > 0 ? "rounded-t-3xl rounded-b-none" : "rounded-3xl"
           )}
         >
@@ -961,47 +973,105 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
           </div>
 
           {/* ПРАВАЯ КОЛОНКА */}
-          <div className="order-last md:order-none w-full md:w-[320px] bg-zinc-50 border-t md:border-t-0 md:border-l border-zinc-100 p-4 sm:p-6 md:p-8 flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute top-0 right-0 -mt-10 -mr-10 h-40 w-40 rounded-full bg-blue-500/10 blur-3xl pointer-events-none" />
-
-            <div className="relative z-10 flex items-center justify-center py-4 md:py-6">
-              <div className="w-[180px] h-[180px] sm:w-[220px] sm:h-[220px] md:w-[260px] md:h-[260px] flex items-center justify-center">
-                <AssortmentScheme
-                  assortment={assortment}
-                  d={
-                    assortment === "Швеллер" ? channelNumber :
-                      assortment === "Отвод" ? elbowSize :
-                        assortment === "Балка/двутавр" ? beamNumber :
-                          d
-                  }
-                  a={a}
-                  b={assortment === "Лента" ? len : b}
-                  t={t}
-                  beamType={assortment === "Балка/двутавр" ? beamType : undefined}
-                />
+          <div className={cn(
+            "order-last md:order-none w-full md:w-[340px] bg-zinc-50 border-t md:border-t-0 md:border-l border-zinc-100 p-6 sm:p-8 md:p-10 flex flex-col justify-between relative h-[560px]",
+            rightPanel === "history" && "bg-white text-zinc-900 shadow-sm"
+          )}>
+            {/* КОМПАКТНАЯ ЗАКЛАДКА "ИСТОРИЯ" */}
+            <button 
+              onClick={() => setRightPanel(rightPanel === "scheme" ? "history" : "scheme")}
+              className={cn(
+                "absolute -right-[32px] top-4 h-24 w-8 border border-zinc-200 flex flex-col items-center justify-center transition-all group z-30 shadow-sm",
+                rightPanel === "history" 
+                  ? "bg-blue-600 border-blue-600 rounded-r-xl shadow-lg ring-2 ring-blue-500/10" 
+                  : "bg-zinc-100 rounded-r-xl hover:bg-zinc-50 hover:translate-x-[2px]"
+              )}
+            >
+              {/* Подсветка сбоку (слева внутри кнопки) */}
+              <div className={cn(
+                "absolute left-0 top-0 bottom-0 w-0.5 transition-colors",
+                rightPanel === "history" ? "bg-white/40" : "bg-blue-500/20 group-hover:bg-blue-500"
+              )} />
+              
+              <div className={cn(
+                "font-black uppercase tracking-[0.1em] transition-colors text-[9px] [writing-mode:vertical-lr] rotate-180 flex items-center justify-center h-full w-full",
+                rightPanel === "history" ? "text-white" : "text-zinc-500 group-hover:text-zinc-900"
+              )}>
+                {rightPanel === "history" ? "Чертеж" : "История"}
               </div>
+            </button>
+
+            <div className="absolute top-0 right-0 -mt-10 -mr-10 h-40 w-40 rounded-full bg-blue-500/10 blur-3xl pointer-events-none opacity-50" />
+
+            {/* КОНТЕНТ (СТАТИЧНАЯ ВЫСОТА) */}
+            <div className="relative z-10 flex-1 flex flex-col pt-2 h-[320px] overflow-hidden">
+                <AnimatePresence mode="wait">
+                  {rightPanel === "scheme" ? (
+                    <motion.div
+                      key="scheme"
+                      initial={{ opacity: 0, scale: 0.98 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{ duration: 0.1 }}
+                      className="w-full h-full flex items-center justify-center"
+                    >
+                       <AssortmentScheme
+                         assortment={assortment}
+                         d={
+                           assortment === "Швеллер" ? channelNumber :
+                             assortment === "Отвод" ? elbowSize :
+                               assortment === "Балка/двутавр" ? beamNumber :
+                                 d
+                         }
+                         a={a}
+                         b={assortment === "Лента" ? len : b}
+                         t={t}
+                         beamType={assortment === "Балка/двутавр" ? beamType : undefined}
+                       />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="history"
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: -10 }}
+                      transition={{ duration: 0.1 }}
+                      className="w-full h-full flex flex-col"
+                    >
+                       <div className="flex items-center justify-between mb-4 pt-1 px-1">
+                          <h4 className="text-[10px] font-black text-zinc-900 uppercase tracking-widest leading-none">История</h4>
+                          <span className="text-[8px] font-black text-zinc-300">5 ЗАПИСЕЙ</span>
+                       </div>
+                       <div className="flex-1 overflow-y-auto pr-1 space-y-2 scrollbar-none">
+                          {history.map((log, i) => (
+                            <div key={i} className="p-3 rounded-xl bg-white border border-zinc-100 hover:border-blue-100 transition-all shadow-sm cursor-pointer group active:scale-[0.98]">
+                               <div className="flex justify-between items-start mb-0.5">
+                                  <span className="text-[8px] font-black text-blue-500/40 uppercase tracking-widest">{log.metal}</span>
+                                  <span className="text-[8px] text-zinc-300">{log.date}</span>
+                               </div>
+                               <div className="text-[11px] font-bold text-zinc-900 group-hover:text-blue-600 truncate">{log.item}</div>
+                               <div className="text-[10px] font-black text-zinc-400 mt-1">{log.weight}</div>
+                            </div>
+                          ))}
+                       </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
             </div>
 
-            <div className="relative z-10 space-y-2">
-              <div className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
-                {mode === "weight" ? "Итоговый вес" : "Итоговая длина"}
+            <div className="relative z-10 space-y-1 mt-auto pt-6 border-t border-zinc-100/60">
+              <div className="text-[10px] font-black uppercase tracking-widest text-zinc-400 leading-none mb-1">
+                {mode === "weight" ? "Вес итог" : "Длина итог"}
               </div>
 
               <div className="flex items-baseline gap-2">
-                <span className="text-3xl sm:text-4xl font-black text-blue-600 tracking-tight">
+                <span className="text-4xl sm:text-5xl font-black text-blue-600 tracking-tighter leading-none">
                   {Object.values(validationErrors).some(e => e.active) ? "—" : fmtNum(result)}
                 </span>
-                <span className="text-lg font-bold text-zinc-400">{mode === "weight" ? "кг" : "м"}</span>
+                <span className="text-xl font-bold text-zinc-300 tracking-tighter uppercase">{mode === "weight" ? "кг" : "м"}</span>
               </div>
 
-              {assortment === "Лист/плита" && mode === "weight" && (
-                <div className="text-sm text-zinc-500">
-                  Площадь: <span className="font-semibold text-zinc-800">{area ? area.toFixed(2) : 0}</span> м²
-                </div>
-              )}
-
-
-              <div className="text-xs text-zinc-400 mt-2 h-4">
+              <div className="text-[9px] font-bold text-zinc-400/80 mt-1 h-3 uppercase tracking-[0.1em]">
                 {assortment ? `${metal} • ${assortment}` : ""}
               </div>
             </div>
