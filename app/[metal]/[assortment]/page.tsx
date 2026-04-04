@@ -21,9 +21,21 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ metal: string, assortment: string }> }): Promise<Metadata> {
   const resolvedParams = await params;
   const { title, description } = getSeoData(resolvedParams.metal, resolvedParams.assortment);
+  const canonicalUrl = `https://metalpro.online/${resolvedParams.metal}/${resolvedParams.assortment}/`;
   return {
     title,
     description,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      type: "website",
+      locale: "ru_RU",
+      siteName: "MetalPro — Калькулятор металла",
+      title,
+      description,
+      url: canonicalUrl,
+    },
   };
 }
 

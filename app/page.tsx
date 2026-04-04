@@ -6,6 +6,17 @@ import { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Калькулятор металла онлайн | Точный вес и длина металлопроката",
   description: "Удобный онлайн калькулятор для расчета веса, длины и площади металлопроката. Черный, нержавеющий, алюминиевый и медный прокат. Без регистрации и таблиц.",
+  alternates: {
+    canonical: "https://metalpro.online/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "ru_RU",
+    siteName: "MetalPro — Калькулятор металла",
+    title: "Калькулятор металла онлайн | Точный вес и длина металлопроката",
+    description: "Удобный онлайн калькулятор для расчета веса, длины и площади металлопроката. Черный, нержавеющий, алюминиевый и медный прокат.",
+    url: "https://metalpro.online/",
+  },
 };
 
 export default function Home() {
