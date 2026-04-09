@@ -36,14 +36,10 @@ export const metadata: Metadata = {
     "max-image-preview": "large" as const,
     "max-video-preview": -1,
   },
-  // Верификация поисковых систем (заменить реальными кодами после регистрации)
+  // Верификация поисковых систем
   verification: {
     // google: "YOUR_GOOGLE_VERIFICATION_CODE",
-    // yandex: "YOUR_YANDEX_VERIFICATION_CODE",
-    other: {
-      // Яндекс вебмастер — раскомментировать после регистрации:
-      // "yandex-verification": "YOUR_CODE",
-    },
+    yandex: "476995d2b82293e3",
   },
   // Базовые OpenGraph для всех страниц (переопределяется на конкретных)
   openGraph: {
