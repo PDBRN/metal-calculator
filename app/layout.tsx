@@ -38,7 +38,7 @@ export const metadata: Metadata = {
   },
   // Верификация поисковых систем
   verification: {
-    // google: "YOUR_GOOGLE_VERIFICATION_CODE",
+    google: "JhPoksogvppmsTmYstuuM6K8Aw01H6xQ6Z3N8h-DzMc",
     yandex: "476995d2b82293e3",
   },
   // Базовые OpenGraph для всех страниц (переопределяется на конкретных)
