@@ -46,13 +46,8 @@ export default async function SeoPage({ params }: { params: Promise<{ metal: str
   return (
     <main className="min-h-screen bg-[#F3F4F6] font-sans flex flex-col">
       
-      {/* 1. Верхний бар (место для будущего меню) */}
-      <div className="h-16 w-full bg-white/60 backdrop-blur-md border-b border-zinc-200 fixed top-0 z-50 flex items-center px-4 md:px-8">
-         <span className="text-zinc-400 font-medium text-sm tracking-wide">Место для меню (Top Bar)</span>
-      </div>
-
       {/* Контент страницы */}
-      <div className="flex-1 w-full flex flex-col items-center pt-20 pb-12 px-4 max-w-[1400px] mx-auto">
+      <div className="flex-1 w-full flex flex-col items-center pt-10 pb-12 px-4 max-w-[1400px] mx-auto">
         
         {/* 2. Строгий и незаметный SEO Заголовок (Стиль: Минимализм) */}
         <div className="max-w-4xl w-full flex flex-col items-start mb-6 px-1 md:px-0">

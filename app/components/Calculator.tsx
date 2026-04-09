@@ -938,11 +938,14 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className={cn(
-            "w-full bg-white shadow-2xl shadow-zinc-200/50 ring-1 ring-zinc-100 transition-all duration-300 relative overflow-hidden",
+            "w-full bg-white shadow-2xl shadow-zinc-200/50 ring-1 ring-zinc-100 transition-all duration-300 relative",
             result > 0 ? "rounded-t-3xl rounded-b-none" : "rounded-3xl"
           )}
         >
-        <div className="flex flex-col md:flex-row h-full">
+        <div className={cn(
+          "flex flex-col md:flex-row h-full overflow-hidden",
+          result > 0 ? "rounded-t-3xl rounded-b-none" : "rounded-3xl"
+        )}>
           {/* ЛЕВАЯ КОЛОНКА */}
           <div className="flex-1 p-6 md:p-8 space-y-6">
             {/* Заголовок + режим */}
@@ -1025,32 +1028,6 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
             "order-last md:order-none w-full md:w-[340px] bg-zinc-50 border-t md:border-t-0 md:border-l border-zinc-100 p-6 sm:p-8 md:p-10 flex flex-col justify-between relative h-[560px]",
             rightPanel === "history" && "bg-white text-zinc-900 shadow-sm"
           )}>
-            {/* КОМПАКТНАЯ ЗАКЛАДКА "ИСТОРИЯ" — только на test1 */}
-            {showHistory && (
-            <button 
-              onClick={() => setRightPanel(rightPanel === "scheme" ? "history" : "scheme")}
-              className={cn(
-                "absolute -right-[32px] top-0 h-24 w-8 border border-zinc-200 flex flex-col items-center justify-center transition-all group z-30 shadow-sm",
-                rightPanel === "history" 
-                  ? "bg-blue-600 border-blue-600 rounded-r-xl rounded-tl-none shadow-lg ring-2 ring-blue-500/10" 
-                  : "bg-zinc-100 rounded-br-xl rounded-tr-xl hover:bg-zinc-50 hover:translate-x-[2px]"
-              )}
-            >
-              {/* Подсветка сбоку (слева внутри кнопки) */}
-              <div className={cn(
-                "absolute left-0 top-0 bottom-0 w-0.5 transition-colors",
-                rightPanel === "history" ? "bg-white/40" : "bg-blue-500/20 group-hover:bg-blue-500"
-              )} />
-              
-              <div className={cn(
-                "font-black uppercase tracking-[0.1em] transition-colors text-[9px] [writing-mode:vertical-lr] rotate-180 flex items-center justify-center h-full w-full",
-                rightPanel === "history" ? "text-white" : "text-zinc-500 group-hover:text-zinc-900"
-              )}>
-                {rightPanel === "history" ? "Чертеж" : "История"}
-              </div>
-            </button>
-            )}
-
             <div className="absolute top-0 right-0 -mt-10 -mr-10 h-40 w-40 rounded-full bg-blue-500/10 blur-3xl pointer-events-none opacity-50" />
 
             {/* КОНТЕНТ (СТАТИЧНАЯ ВЫСОТА) */}
@@ -1127,6 +1104,32 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
             </div>
           </div>
         </div>
+
+        {/* КОМПАКТНАЯ ЗАКЛАДКА "ИСТОРИЯ" — только на test1 (вынесено из-под overflow-hidden) */}
+        {showHistory && (
+          <button 
+            onClick={() => setRightPanel(rightPanel === "scheme" ? "history" : "scheme")}
+            className={cn(
+              "absolute -right-[31px] top-0 h-24 w-8 border border-zinc-200 border-l-0 flex flex-col items-center justify-center transition-all group z-30 shadow-sm",
+              rightPanel === "history" 
+                ? "bg-blue-600 border-blue-600 rounded-r-xl rounded-tl-none shadow-lg ring-2 ring-blue-500/10" 
+                : "bg-zinc-100 rounded-br-xl rounded-tr-xl hover:bg-zinc-50 hover:translate-x-[2px]"
+            )}
+          >
+            {/* Подсветка сбоку (слева внутри кнопки) */}
+            <div className={cn(
+              "absolute left-0 top-0 bottom-0 w-0.5 transition-colors",
+              rightPanel === "history" ? "bg-white/40" : "bg-blue-500/20 group-hover:bg-blue-500"
+            )} />
+            
+            <div className={cn(
+              "font-black uppercase tracking-[0.1em] transition-colors text-[9px] [writing-mode:vertical-lr] rotate-180 flex items-center justify-center h-full w-full",
+              rightPanel === "history" ? "text-white" : "text-zinc-500 group-hover:text-zinc-900"
+            )}>
+              {rightPanel === "history" ? "Чертеж" : "История"}
+            </div>
+          </button>
+        )}
 
         </motion.div>
 

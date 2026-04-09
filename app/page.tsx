@@ -22,13 +22,8 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <main className="min-h-screen bg-[#F3F4F6] font-sans flex flex-col">
-      {/* 1. Верхний бар (место для будущего меню) */}
-      <div className="h-16 w-full bg-white/60 backdrop-blur-md border-b border-zinc-200 fixed top-0 z-50 flex items-center px-4 md:px-8">
-         <span className="text-zinc-400 font-medium text-sm tracking-wide">Место для меню (Top Bar)</span>
-      </div>
-
       {/* Контент страницы */}
-      <div className="flex-1 w-full flex flex-col items-center pt-20 pb-6 px-4 max-w-[1400px] mx-auto">
+      <div className="flex-1 w-full flex flex-col items-center pt-10 pb-6 px-4 max-w-[1400px] mx-auto">
         
         {/* Скрытый заголовок для SEO (не портит внешний вид) */}
         <h1 className="sr-only">Калькулятор металла онлайн. Точный вес и длина металлопроката.</h1>
