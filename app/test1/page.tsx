@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { Metadata } from "next";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { getSeoData, METAL_TO_ASSORTMENTS, METAL_SLUG_TO_NAME, ASSORTMENT_SLUG_TO_NAME } from "../lib/seo-engine";
