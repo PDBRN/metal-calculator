@@ -40,13 +40,14 @@ type Mode = "weight" | "length";
 interface CalculatorProps {
   initialMetal?: Metal;
   initialAssortment?: string;
+  initialSlug?: string;
   seoTitle?: string;
   seoTitleSuffix?: string;
   showHistory?: boolean;
   isMainPage?: boolean;
 }
 
-export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitleSuffix, showHistory = false, isMainPage = false }: CalculatorProps = {}) {
+export function Calculator({ initialMetal, initialAssortment, initialSlug, seoTitle, seoTitleSuffix, showHistory = false, isMainPage = false }: CalculatorProps = {}) {
   console.log("[CALC] Render Calculator");
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -89,11 +90,20 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
   const [steelMark, setSteelMark] = useState("Ст 3");
 
   // --- Балка/двутавр ---
-  const [beamType, setBeamType] = useState("GOST_8239_89");
-  const [beamNumber, setBeamNumber] = useState("");
+  const [beamType, setBeamType] = useState(() => {
+    if (initialSlug?.replace('beam-', '') === 'gost-26020') return 'GOST_26020_83';
+    return 'GOST_8239_89';
+  });
+  const [beamNumber, setBeamNumber] = useState(() => {
+    if (initialSlug?.startsWith('beam-') && !initialSlug.includes('gost')) return initialSlug.replace('beam-', '');
+    return "";
+  });
 
   // --- Швеллер ---
-  const [channelNumber, setChannelNumber] = useState("20П");
+  const [channelNumber, setChannelNumber] = useState(() => {
+    if (initialSlug?.startsWith('channel-') && !initialSlug.includes('gost')) return initialSlug.replace('channel-', '').toUpperCase().replace('P', 'П').replace('U', 'У');
+    return "20П";
+  });
 
   // --- Отвод ---
   const [elbowExecution, setElbowExecution] = useState<ElbowExecution>("Исполнение 1");
@@ -101,10 +111,25 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
 
 
   // --- Геометрия (мм в UI -> в calc переводим в метры) ---
-  const [d, setD] = useState("10"); // диаметр (мм)
-  const [t, setT] = useState(""); // толщина/стенка (мм)
-  const [a, setA] = useState(""); // a (мм)
-  const [b, setB] = useState(""); // b (мм)
+  const [d, setD] = useState(() => {
+    if (initialSlug?.startsWith('rebar-') && !initialSlug.includes('gost')) return initialSlug.replace('rebar-', '');
+    if (initialSlug?.startsWith('pipe-round-') && !initialSlug.includes('gost')) return initialSlug.replace('pipe-round-', '');
+    return "10";
+  });
+  const [t, setT] = useState(() => {
+    if (initialSlug?.startsWith('sheet-') && !initialSlug.includes('gost')) return initialSlug.replace('sheet-', '');
+    return "";
+  });
+  const [a, setA] = useState(() => {
+    if (initialSlug?.startsWith('pipe-profile-') && !initialSlug.includes('gost')) return initialSlug.replace('pipe-profile-', '').split('x')[0];
+    if (initialSlug?.startsWith('angle-') && !initialSlug.includes('gost')) return initialSlug.replace('angle-', '').split('x')[0];
+    return "";
+  });
+  const [b, setB] = useState(() => {
+    if (initialSlug?.startsWith('pipe-profile-') && !initialSlug.includes('gost')) return initialSlug.replace('pipe-profile-', '').split('x')[1];
+    if (initialSlug?.startsWith('angle-') && !initialSlug.includes('gost')) return initialSlug.replace('angle-', '').split('x')[1];
+    return "";
+  });
 
   // --- Ввод расчёта ---
   const [len, setLen] = useState(""); // L (м)
@@ -223,8 +248,7 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
 
     // Когда выбрали балку — подставим номер по умолчанию
     if (assortment === "Балка/двутавр") {
-      const first = beamNumbersOptions[0] || "";
-      setBeamNumber(first);
+      setBeamNumber(prev => prev ? prev : (beamNumbersOptions[0] || ""));
       if (!qty) setQty("1");
     }
 
@@ -244,12 +268,7 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, assortment]);
 
-  // Если изменился тип балки — обновляем номер балки на первый доступный
-  useEffect(() => {
-    if (assortment !== "Балка/двутавр") return;
-    const first = beamNumbersOptions[0] || "";
-    setBeamNumber(first);
-  }, [beamType, beamNumbersOptions, assortment]);
+  // Синхронизация при выборе сортамента
 
   // Обновление URL при изменении параметров
   useEffect(() => {
@@ -407,7 +426,12 @@ export function Calculator({ initialMetal, initialAssortment, seoTitle, seoTitle
               <UiSelect
                 label="Тип балки"
                 value={beamType}
-                onChange={setBeamType}
+                onChange={(val) => {
+                  setBeamType(val);
+                  const list = BEAM_NUMBERS_BY_TYPE[val] || [];
+                  const sorted = [...list].sort((x, y) => x.localeCompare(y, "ru"));
+                  setBeamNumber(sorted[0] || "");
+                }}
                 options={BEAM_TYPES}
               />
 

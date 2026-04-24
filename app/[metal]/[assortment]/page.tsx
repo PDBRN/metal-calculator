@@ -79,6 +79,7 @@ export default async function SeoPage({ params }: { params: Promise<{ metal: str
               key={`${resolvedParams.metal}-${resolvedParams.assortment}`}
               initialMetal={metalName as Metal} 
               initialAssortment={assortmentName} 
+              initialSlug={resolvedParams.assortment}
             />
           </Suspense>
         </div>
