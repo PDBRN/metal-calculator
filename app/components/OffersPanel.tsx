@@ -39,7 +39,12 @@ export function OffersPanel({ metal, assortment }: OffersPanelProps) {
         <div className="w-full overflow-hidden rounded-b-3xl bg-white border-t border-zinc-100 ring-1 ring-zinc-100 shadow-xl shadow-zinc-200/50">
             {/* Шапка (Кнопка для раскрытия) */}
             <div
-                onClick={() => setExpanded(!expanded)}
+                onClick={() => {
+                    setExpanded(!expanded);
+                    if (typeof window !== 'undefined' && (window as any).ym) {
+                        (window as any).ym(108452367, 'reachGoal', 'where_to_buy');
+                    }
+                }}
                 className={cn(
                     "flex w-full cursor-pointer items-center justify-between px-6 py-5 transition-colors",
                     // Когда свёрнуто — hover скругляет низ вместе с контейнером
@@ -194,6 +199,11 @@ function OfferItem({ offer, index }: { offer: any; index: number }) {
                     href={offer.link}
                     target="_blank"
                     rel="noopener noreferrer"
+                    onClick={() => {
+                        if (typeof window !== 'undefined' && (window as any).ym) {
+                            (window as any).ym(108452367, 'reachGoal', 'go_to_catalog');
+                        }
+                    }}
                     className="flex-1 sm:flex-none flex items-center justify-center rounded-xl bg-[#5a7f9e] px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-[#4a6b8a] transition-all active:scale-[0.98]"
                 >
                     Перейти в каталог
