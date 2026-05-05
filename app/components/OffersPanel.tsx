@@ -190,6 +190,11 @@ function OfferItem({ offer, index }: { offer: any; index: number }) {
             <div className="flex w-full sm:w-auto items-center gap-3 justify-end shrink-0">
                 <a
                     href={`tel:${offer.phone}`}
+                    onClick={() => {
+                        if (typeof window !== 'undefined' && (window as any).ym) {
+                            (window as any).ym(108452367, 'reachGoal', `call_${offer.companyKey}`);
+                        }
+                    }}
                     className="flex h-10 w-10 items-center justify-center rounded-xl border border-zinc-200 text-zinc-500 hover:border-zinc-300 hover:bg-zinc-100 hover:text-zinc-900 transition-all"
                     title={offer.phone}
                 >
